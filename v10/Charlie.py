@@ -8,7 +8,7 @@ PowerFont = pygame.font.Font(None, 50)
 center = (600,450)
 Transparent = (0, 0, 0, 0)
 
-#GAME STATES 
+#GAME STATES
 Mainscreen = True
 Options = False
 Game = False
