@@ -33,6 +33,7 @@ def Reset(): #resets values to default everytime player starts a new agme
     Time = 10000
 
 #Mechanics
+poosigma = True
 Dark = pygame.image.load("Data/Mechanics/Dark.png")
 Flashlight = pygame.image.load("Data/Mechanics/flashlight.png")
 Power = 0
