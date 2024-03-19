@@ -9,26 +9,28 @@ center = (600,450)
 Transparent = (0, 0, 0, 0)
 
 #GAME STATES
-poosigma = True
 Mainscreen = True
 Options = False
 Game = False
 Over = False
 Custom = False
 Canpress = -1
-black = pygame.image.load("v10/Data/Map/black.png")
+Win = True
+black = pygame.image.load("Data/Map/black.png")
 
 #INGAME STATES
 Main = True
 Cams = False
 Backdoor = False
 def Reset(): #resets values to default everytime player starts a new agme
-    global Power, FlashlightPOS, FX, FY, PowerDrain
+    global Power, FlashlightPOS, FX, FY, PowerDrain, CameraPos, Time
     Power = 20000
     FlashlightPOS = 1
     FX = -230
     FY = -400
     PowerDrain = 1
+    CameraPos = 0
+    Time = 10000
 
 #Mechanics
 Dark = pygame.image.load("Data/Mechanics/Dark.png")
@@ -36,7 +38,7 @@ Flashlight = pygame.image.load("Data/Mechanics/flashlight.png")
 Power = 0
 FX = -800
 FY = -400
-
+Time = 10000
 #COOLDOWNS
 Xcanpress = True
 BackCD = [-1]
@@ -46,13 +48,12 @@ def Cooldown(Pressable, CD, MAX): #cooldown function to set a CD to be MAX secon
     global Xcanpress, Ccanpress
     if CD[0] == -1:
         CD[0] = 0
-        print("signa")
+        print("CD triggered")
     if CD[0] >= 0:
         CD[0] += 1
-        print("CD")
         if CD[0] >= MAX:
             CD[0] = -1
-            print("CD READY")
+            print("CD ready")
             if Pressable == 1:
                 Xcanpress = True
             elif Pressable == 2:
@@ -355,6 +356,7 @@ while True:
     if Game: #when game is active // at any point in the game
         screen.blit(black, (0,0))
         Power -= 1
+        Time -= 1
         if Xcanpress == False:
           Cooldown(1, BackCD, 10)
         if Ccanpress == False:
@@ -363,6 +365,7 @@ while True:
             screen.blit(Office, (0,0))
             screen.blit(Dark, (0,0))
             PowerDisplay = PowerFont.render(str(Power//200)+"%", True, "White")
+            TimeDisplay = PowerFont.render("TIME: " + str(Time//100)+" whatsit", True, "White")
             if keys[pygame.K_a] and FlashlightPOS != 0:
                 FlashlightPOS = 0
             if keys[pygame.K_d] and FlashlightPOS != 2:
@@ -388,11 +391,12 @@ while True:
                 PowerDrain = FlashlightPOS
             screen.blit(Flashlight, (FX,FY))
             screen.blit(PowerDisplay,(0,1000))
+            screen.blit(TimeDisplay, (0,0))
             if keys[pygame.K_x] and Xcanpress:
                 Backdoor = True
                 Main = False
                 Xcanpress = False
-                print("Here")
+                print("Main to Back")
             if keys[pygame.K_c] and Ccanpress:
                 Cams = True
                 Main = False
@@ -405,7 +409,12 @@ while True:
                 Main = True
                 Backdoor = False
                 Xcanpress = False
-                print("Test")
+                print("Back to Main")
+        if Time <= 0:
+            Win = True
+            Game = False
+        if Time > 0:
+            Win = False
         if Power <= 0:
             Game = False
             Over = True
