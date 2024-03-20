@@ -33,7 +33,6 @@ def Reset(): #resets values to default everytime player starts a new agme
     Time = 10000
 
 #Mechanics
-poosigma = True
 Dark = pygame.image.load("Data/Mechanics/Dark.png")
 Flashlight = pygame.image.load("Data/Mechanics/flashlight.png")
 Power = 0
@@ -59,6 +58,27 @@ def Cooldown(Pressable, CD, MAX): #cooldown function to set a CD to be MAX secon
                 Xcanpress = True
             elif Pressable == 2:
                 Ccanpress = True
+#DOOR
+Rdoor = pygame.image.load("Data/Mechanics/Rdoor.png")
+Rdoor = pygame.transform.scale(Rdoor, (1920,1080))
+Ldoor = pygame.image.load("Data/Mechanics/Ldoor.png")
+Ldoor = pygame.transform.scale(Ldoor, (1920,1080))
+LDCLOSED = True
+RDCLOSED = True
+LDPOS = 0
+RDPOS = 0
+DoorY = 0
+def DoorOpen(Side):
+    global LDCLOSED, RDCLOSED
+    if Side == "Left":
+        if LDPOS == 0:
+            LDPOS = -500
+            LDCLOSED = False
+        if LDPOS == -500:
+            LDPOS == 0
+    if Side == "Right":
+
+
 #Camera Effect
 CHS0 = pygame.image.load("Data/Map/CameraEffect/frame_0_delay-0.05s.png")
 CHS1 = pygame.image.load("Data/Map/CameraEffect/frame_1_delay-0.05s.png")
@@ -68,7 +88,6 @@ CHS4 = pygame.image.load("Data/Map/CameraEffect/frame_4_delay-0.05s.png")
 CHS5 = pygame.image.load("Data/Map/CameraEffect/frame_5_delay-0.05s.png")
 CHS6 = pygame.image.load("Data/Map/CameraEffect/frame_6_delay-0.05s.png")
 CHS7 = pygame.image.load("Data/Map/CameraEffect/frame_7_delay-0.05s.png")
-
 CHSINDEX = 0
 CHS = [CHS0, CHS1, CHS2, CHS3, CHS4, CHS5, CHS6, CHS7]
 def CHSEFFECT():
@@ -76,6 +95,15 @@ def CHSEFFECT():
     for i in range (0,2):
         CHS[CHSINDEX] = pygame.transform.scale(CHS[CHSINDEX], (1920, 1080))
         screen.blit(CHS[CHSINDEX], (0,0))
+        CHSINDEX += 1
+        if CHSINDEX >= 7:
+            CHSINDEX = 0           
+BACKCHS = CHS
+def BACKCHSEFFECT():
+    global CHSINDEX
+    for i in range (0,2):
+        BACKCHS[CHSINDEX] = pygame.transform.scale(BACKCHS[CHSINDEX], (1650, 900))
+        screen.blit(BACKCHS[CHSINDEX], (110,80))
         CHSINDEX += 1
         if CHSINDEX >= 7:
             CHSINDEX = 0
@@ -364,6 +392,8 @@ while True:
           Cooldown(2, CamCD, 10)
         if Main:
             screen.blit(Office, (0,0))
+            screen.blit(Rdoor, (0,0))
+            screen.blit(Ldoor, (0,0))
             screen.blit(Dark, (0,0))
             PowerDisplay = PowerFont.render(str(Power//200)+"%", True, "White")
             TimeDisplay = PowerFont.render("TIME: " + str(Time//100)+" whatsit", True, "White")
@@ -405,6 +435,7 @@ while True:
         if Backdoor:
             screen.blit(black, (0,0))
             screen.blit(Back, (0,0))
+            BACKCHSEFFECT()
             screen.blit(Dark, (0,0))
             if keys[pygame.K_x] and Xcanpress:
                 Main = True
