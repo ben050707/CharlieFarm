@@ -76,7 +76,6 @@ def DoorOpen(Side):
             LDCLOSED = False
         if LDPOS == -500:
             LDPOS == 0
-    if Side == "Right":
 
 
 #Camera Effect
