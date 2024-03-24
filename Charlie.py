@@ -1,5 +1,5 @@
 import pygame
-
+import time
 pygame.init()
 screen = pygame.display.set_mode((1920,1080))
 pygame.display.set_caption("Charlie's Farm")
@@ -23,14 +23,16 @@ Main = True
 Cams = False
 Backdoor = False
 def Reset(): #resets values to default everytime player starts a new agme
-    global Power, FlashlightPOS, FX, FY, PowerDrain, CameraPos, Time
+    global Power, FlashlightPOS, FX, FY, PowerDrain, CameraPos, Time, CDstart, CDtime
     Power = 20000
     FlashlightPOS = 1
     FX = -230
     FY = -400
     PowerDrain = 1
     CameraPos = 0
-    Time = 10000
+    Time = int(time.time())
+    CDstart = True
+    CDtime = 0
 
 #Mechanics
 Dark = pygame.image.load("Data/Mechanics/Dark.png")
@@ -41,23 +43,18 @@ FY = -400
 Time = 10000
 #COOLDOWNS
 Xcanpress = True
-BackCD = [-1]
 Ccanpress = True
-CamCD = [-1]
-def Cooldown(Pressable, CD, MAX): #cooldown function to set a CD to be MAX seconds long
-    global Xcanpress, Ccanpress
-    if CD[0] == -1:
-        CD[0] = 0
-        print("CD triggered")
-    if CD[0] >= 0:
-        CD[0] += 1
-        if CD[0] >= MAX:
-            CD[0] = -1
-            print("CD ready")
-            if Pressable == 1:
-                Xcanpress = True
-            elif Pressable == 2:
-                Ccanpress = True
+def Cooldown(CD, MAX): #cooldown function to set a CD to be MAX seconds long
+    global Xcanpress, Ccanpress, CDstart, CDtime
+    if CDstart == True:
+        CDtime = int(time.time())
+        CDstart = False
+        print("skibidi")
+    if CDtime + MAX == int(time.time()):
+        CD = True
+        CDstart = True
+        print("sigma")
+    return CD
 #DOOR
 Rdoor = pygame.image.load("Data/Mechanics/Rdoor.png")
 Rdoor = pygame.transform.scale(Rdoor, (1920,1080))
@@ -214,6 +211,14 @@ CCoby = CustomChar(0, CCobyPFP, ArrowL.get_rect(center = (600, 280)), ArrowR.get
 CFrederick = CustomChar(0, CFrederickPFP, ArrowL.get_rect(center = (120, 570)), ArrowR.get_rect(center = (220, 570)))
 CCedrick = CustomChar(0, CCedrickPFP, ArrowL.get_rect(center = (360, 570)), ArrowR.get_rect(center = (460, 570)))
 CFred_Derrick = CustomChar(0, CFred_DerrickPFP, ArrowL.get_rect(center = (600, 570)), ArrowR.get_rect(center = (700, 570)))
+
+#example skibis
+class rizz():
+    def __init__(self, edge, mog, skibid, edgemod):
+        super().__init__()
+        self.edge = edge
+        self.mog = mog
+
 
 #Camera states
 Changepos = 0
@@ -384,18 +389,20 @@ while True:
     if Game: #when game is active // at any point in the game
         screen.blit(black, (0,0))
         Power -= 1
-        Time -= 1
         if Xcanpress == False:
-          Cooldown(1, BackCD, 10)
+          Xcanpress = Cooldown(Xcanpress, 2)
         if Ccanpress == False:
-          Cooldown(2, CamCD, 10)
+          Ccanpress = Cooldown(Ccanpress, 2)
         if Main:
             screen.blit(Office, (0,0))
             screen.blit(Rdoor, (0,0))
             screen.blit(Ldoor, (0,0))
             screen.blit(Dark, (0,0))
             PowerDisplay = PowerFont.render(str(Power//200)+"%", True, "White")
-            TimeDisplay = PowerFont.render("TIME: " + str(Time//100)+" whatsit", True, "White")
+            if ((int(time.time() - Time)) // 60) >=  1:
+                TimeDisplay = PowerFont.render("TIME: " + str((int(time.time()) - Time) // 60)+"AM", True, "White")
+            else:
+                TimeDisplay = PowerFont.render("TIME: " + str(((int(time.time()) - Time) // 60)+ 12)+"AM", True, "White")
             if keys[pygame.K_a] and FlashlightPOS != 0:
                 FlashlightPOS = 0
             if keys[pygame.K_d] and FlashlightPOS != 2:
@@ -441,10 +448,10 @@ while True:
                 Backdoor = False
                 Xcanpress = False
                 print("Back to Main")
-        if Time <= 0:
+        if Time + 360 == int(time.time()):
             Win = True
             Game = False
-        if Time > 0:
+        else:
             Win = False
         if Power <= 0:
             Game = False
