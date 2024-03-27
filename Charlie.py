@@ -44,16 +44,18 @@ Time = 10000
 #COOLDOWNS
 Xcanpress = True
 Ccanpress = True
+Lcanpress = True
+Rcanpress = True
 def Cooldown(CD, MAX): #cooldown function to set a CD to be MAX seconds long
     global Xcanpress, Ccanpress, CDstart, CDtime
     if CDstart == True:
         CDtime = int(time.time())
         CDstart = False
-        print("skibidi")
+        print("CD started")
     if CDtime + MAX == int(time.time()):
         CD = True
         CDstart = True
-        print("sigma")
+        print("CD finished")
     return CD
 #DOOR
 Rdoor = pygame.image.load("Data/Mechanics/Rdoor.png")
@@ -62,17 +64,32 @@ Ldoor = pygame.image.load("Data/Mechanics/Ldoor.png")
 Ldoor = pygame.transform.scale(Ldoor, (1920,1080))
 LDCLOSED = True
 RDCLOSED = True
-LDPOS = 0
-RDPOS = 0
+LDPOS = -500
+RDPOS = -500
 DoorY = 0
 def DoorOpen(Side):
-    global LDCLOSED, RDCLOSED
+    global LDCLOSED, RDCLOSED, LDPOS, RDPOS
     if Side == "Left":
         if LDPOS == 0:
             LDPOS = -500
             LDCLOSED = False
-        if LDPOS == -500:
-            LDPOS == 0
+            print("Left Door Opened")
+        elif LDPOS == -500:
+            LDPOS = 0
+            LDCLOSED = True
+            print("Left door Closed")
+        return LDPOS
+    if Side == "Right":
+        if RDPOS == 0:
+            RDPOS = -500
+            RDCLOSED = False
+            print("Right Door Opened")
+        elif RDPOS == -500:
+            RDPOS = 0
+            RDCLOSED = True
+            print("Right door Closed")
+        return RDPOS
+
 
 
 #Camera Effect
@@ -393,16 +410,26 @@ while True:
           Xcanpress = Cooldown(Xcanpress, 2)
         if Ccanpress == False:
           Ccanpress = Cooldown(Ccanpress, 2)
+        if Lcanpress == False:
+            Lcanpress = Cooldown(Lcanpress, 1)
+        if Rcanpress == False:
+            Rcanpress = Cooldown(Rcanpress, 1)
         if Main:
             screen.blit(Office, (0,0))
-            screen.blit(Rdoor, (0,0))
-            screen.blit(Ldoor, (0,0))
+            screen.blit(Rdoor, (0,RDPOS))
+            screen.blit(Ldoor, (0,LDPOS))
             screen.blit(Dark, (0,0))
             PowerDisplay = PowerFont.render(str(Power//200)+"%", True, "White")
             if ((int(time.time() - Time)) // 60) >=  1:
                 TimeDisplay = PowerFont.render("TIME: " + str((int(time.time()) - Time) // 60)+"AM", True, "White")
             else:
                 TimeDisplay = PowerFont.render("TIME: " + str(((int(time.time()) - Time) // 60)+ 12)+"AM", True, "White")
+            if keys[pygame.K_q] and Lcanpress:
+                LDPOS = DoorOpen("Left")
+                Lcanpress = False
+            if keys[pygame.K_e] and Rcanpress:
+                RDPOS = DoorOpen("Right")
+                Rcanpress = False
             if keys[pygame.K_a] and FlashlightPOS != 0:
                 FlashlightPOS = 0
             if keys[pygame.K_d] and FlashlightPOS != 2:
@@ -426,6 +453,10 @@ while True:
             if PowerDrain != FlashlightPOS:
                 Power = Power - 20
                 PowerDrain = FlashlightPOS
+            if LDCLOSED:
+                Power -= 10
+            if RDCLOSED:
+                Power -= 10
             screen.blit(Flashlight, (FX,FY))
             screen.blit(PowerDisplay,(0,1000))
             screen.blit(TimeDisplay, (0,0))
