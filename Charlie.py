@@ -196,6 +196,7 @@ RWall = map_import("Data/Map/RightWall.png")
 RHall = map_import("Data/Map/RightHall.png")
 UWall = map_import("Data/map/UpWall.png")
 UHall = map_import("Data/Map/UpHall.png")
+FHall = map_import("Data/Map/FrontHall.png")
 
 #CustomCharacters
 CharacterBar1 = PowerFont.render(" Chavo                Cody                 Coby", True, "White")
@@ -240,7 +241,7 @@ class rizz():
 #Camera states
 Changepos = 0
 CameraPos = 0
-CurrentCam = [LWall, LHall,RWall, RHall, UWall, UHall, Coop]
+CurrentCam = [LWall, LHall,RWall, RHall, UWall, UHall, Coop, FHall]
 def NumCam():
     global CameraPos
     if keys[pygame.K_1]:
@@ -257,6 +258,8 @@ def NumCam():
         CameraPos = 5
     if keys[pygame.K_7]:
         CameraPos = 6
+    if keys[pygame.K_8]:
+        CameraPos = 7
 #Main
 while True:
     mousepos = pygame.mouse.get_pos()
