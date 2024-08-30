@@ -23,7 +23,7 @@ Main = True
 Cams = False
 Backdoor = False
 def Reset(): #resets values to default everytime player starts a new agme
-    global Power, FlashlightPOS, FX, FY, PowerDrain, CameraPos, Time, CDstart, CDtime
+    global Power, FlashlightPOS, FX, FY, PowerDrain, CameraPos, Time, CDstart, CDtime, LDCLOSED, RDCLOSED
     Power = 20000
     FlashlightPOS = 1
     FX = -230
@@ -33,6 +33,8 @@ def Reset(): #resets values to default everytime player starts a new agme
     Time = int(time.time())
     CDstart = True
     CDtime = 0
+    LDCLOSED = False
+    RDCLOSED = False
 
 #Mechanics
 Dark = pygame.image.load("Data/Mechanics/Dark.png")
@@ -423,10 +425,11 @@ while True:
             screen.blit(Ldoor, (0,LDPOS))
             screen.blit(Dark, (0,0))
             PowerDisplay = PowerFont.render(str(Power//200)+"%", True, "White")
-            if ((int(time.time() - Time)) // 60) >=  1:
-                TimeDisplay = PowerFont.render("TIME: " + str((int(time.time()) - Time) // 60)+"AM", True, "White")
+            elapsed_time = (int(time.time()) - Time) * 2  # Double the elapsed time
+            if (elapsed_time // 60) >= 1:
+                TimeDisplay = PowerFont.render("TIME: " + str(elapsed_time // 60) + "AM", True, "White")
             else:
-                TimeDisplay = PowerFont.render("TIME: " + str(((int(time.time()) - Time) // 60)+ 12)+"AM", True, "White")
+                TimeDisplay = PowerFont.render("TIME: " + str((elapsed_time // 60) + 12) + "AM", True, "White")
             if keys[pygame.K_q] and Lcanpress:
                 LDPOS = DoorOpen("Left")
                 Lcanpress = False
@@ -504,6 +507,7 @@ while True:
                 Main = True
                 Cams = False
                 Ccanpress = False
+        print(str((elapsed_time // 60) + 12))
     if Over:
         Cams = False
         Backdoor = False
