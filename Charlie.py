@@ -13,9 +13,10 @@ Mainscreen = True
 Options = False
 Game = False
 Over = False
+Win = False
 Custom = False
 Canpress = -1
-Win = True
+Win = False
 black = pygame.image.load("Data/Map/black.png")
 
 #INGAME STATES
@@ -23,7 +24,7 @@ Main = True
 Cams = False
 Backdoor = False
 def Reset(): #resets values to default everytime player starts a new agme
-    global Power, FlashlightPOS, FX, FY, PowerDrain, CameraPos, Time, CDstart, CDtime, LDCLOSED, RDCLOSED
+    global Power, FlashlightPOS, FX, FY, PowerDrain, CameraPos, Time, CDstart, CDtime, LDCLOSED, RDCLOSED, Over, Win
     Power = 20000
     FlashlightPOS = 1
     FX = -230
@@ -35,6 +36,9 @@ def Reset(): #resets values to default everytime player starts a new agme
     CDtime = 0
     LDCLOSED = False
     RDCLOSED = False
+    Over = False
+    Win = False
+
 
 #Mechanics
 Dark = pygame.image.load("Data/Mechanics/Dark.png")
@@ -43,6 +47,8 @@ Power = 0
 FX = -800
 FY = -400
 Time = 10000
+
+
 #COOLDOWNS
 Xcanpress = True
 Ccanpress = True
@@ -53,11 +59,9 @@ def Cooldown(CD, MAX): #cooldown function to set a CD to be MAX seconds long
     if CDstart == True:
         CDtime = int(time.time())
         CDstart = False
-        print("CD started")
     if CDtime + MAX == int(time.time()):
         CD = True
         CDstart = True
-        print("CD finished")
     return CD
 #DOOR
 Rdoor = pygame.image.load("Data/Mechanics/Rdoor.png")
@@ -177,7 +181,9 @@ BeginButtonRect = BeginButton.get_rect(center = (1500, 850))
 
 #GameOver Screen
 OverScreen = pygame.image.load("Data/GameOver/OverScreen.png")
-OverScreen = pygame.transform.scale(OverScreen, (1920, 1080))
+OverScreen = pygame.transform.scale(OverScreen, (1920,1080))
+WinScreen = pygame.image.load("Data/GameOver/Survived.png")
+WinScreen = pygame.transform.scale(WinScreen,(1920,1080))
 
 Menubutton = pygame.image.load("Data/GameOver/MenuButton.png")
 MenubuttonP = pygame.image.load("Data/GameOver/MenuButtonP.png")
@@ -485,9 +491,9 @@ while True:
                 Backdoor = False
                 Xcanpress = False
                 print("Back to Main")
-        if Time + 360 == int(time.time()):
-            Win = True
+        if (elapsed_time // 60) == 6:
             Game = False
+            Win = True
         else:
             Win = False
         if Power <= 0:
@@ -507,7 +513,17 @@ while True:
                 Main = True
                 Cams = False
                 Ccanpress = False
-        print(str((elapsed_time // 60) + 12))
+    if Win:
+        Cams = False
+        Backdoor = False
+        Main = True
+        screen.blit(WinScreen, (0,0))
+        screen.blit(Menubutton, (MenubuttonRect))
+        if MenubuttonRect.collidepoint(mousepos):
+            screen.blit(MenubuttonP, MenubuttonRect)
+            if mousepress[0]:
+                Mainscreen = True
+                Win = False
     if Over:
         Cams = False
         Backdoor = False
