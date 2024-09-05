@@ -268,6 +268,250 @@ def NumCam():
         CameraPos = 6
     if keys[pygame.K_8]:
         CameraPos = 7
+def MainScreen():
+    global Custom, Mainscreen, Options
+    VHSEFFECT()
+    screen.blit(Title,(200, 200))
+    screen.blit(Playbutton, PlaybuttonRect)
+    screen.blit(Quitbutton, QuitbuttonRect)
+    screen.blit(Optionsbutton, OptionsbuttonRect)
+    screen.blit(CharliePFP, (1200, 600))
+    if PlaybuttonRect.collidepoint(mousepos):
+        screen.blit(PlaybuttonP, PlaybuttonRect)
+        if mousepress[0]:
+            MainStack.append(Customs)
+    if OptionsbuttonRect.collidepoint(mousepos):
+        screen.blit(OptionsbuttonP, OptionsbuttonRect)
+        if mousepress[0]:
+            MainStack.append(Options)
+    if QuitbuttonRect.collidepoint(mousepos):
+        screen.blit(QuitbuttonP, QuitbuttonRect)
+        if mousepress[0]:
+            pygame.quit()
+            exit()
+def Customs():
+    global Custom, Mainscreen, Game
+    CChavoText = PowerFont.render(str(CChavo.diff), True, "White")
+    CFrederickText = PowerFont.render(str(CFrederick.diff), True, "White")
+    CCodyText = PowerFont.render(str(CCody.diff), True, "White")
+    CCobyText = PowerFont.render(str(CCoby.diff), True, "White")
+    CCedrickText = PowerFont.render(str(CCedrick.diff), True, "White")
+    CFred_DerrickText = PowerFont.render(str(CFred_Derrick.diff), True, "White")
+    VHSEFFECT()
+    screen.blit(Customborders,(0,0))
+    screen.blit(Backbutton, BackbuttonRect)
+    screen.blit(BeginButton, BeginButtonRect)
+    screen.blit(CharacterBar1,(100, 25))
+    screen.blit(CharacterBar2,(80, 520))
+    screen.blit(CChavoText, (160, 265))
+    screen.blit(CChavo.pfp, (80, 80))
+    screen.blit(ArrowL, (CChavo.LR))
+    screen.blit(ArrowR, (CChavo.RR))
+    screen.blit(CFrederickText, (160, 555))
+    screen.blit(CFrederickPFP, (80, 340))
+    screen.blit(ArrowL, (CFrederick.LR))
+    screen.blit(ArrowR, (CFrederick.RR))
+    screen.blit(CCodyText, (400, 265))
+    screen.blit(CCodyPFP, (320,80))
+    screen.blit(ArrowL, (CCody.LR))
+    screen.blit(ArrowR, (CCody.RR))
+    screen.blit(CCobyText, (640, 265))
+    screen.blit(CCobyPFP, (560, 80))
+    screen.blit(ArrowL, (CCoby.LR))
+    screen.blit(ArrowR, (CCoby.RR))
+    screen.blit(CFred_DerrickText, (640, 555))
+    screen.blit(CFred_DerrickPFP, (560, 340))
+    screen.blit(ArrowL, (CFred_Derrick.LR))
+    screen.blit(ArrowR, (CFred_Derrick.RR))
+    screen.blit(CCedrickText, (400, 555))
+    screen.blit(CCedrickPFP, (320, 340))
+    screen.blit(ArrowL, (CCedrick.LR))
+    screen.blit(ArrowR, (CCedrick.RR))
+    if CChavo.diff >= 11: #Custom difficulty selection for each character
+        CChavo.diff = 0
+    if CChavo.diff <= -1:
+        CChavo.diff = 10
+    if CChavo.LR.collidepoint(mousepos):
+        if mousepress[0] and CChavo.diff < 11 and CChavo.diff > -1 and Canpress == -1:
+            CChavo.diff -= 1
+    if CChavo.RR.collidepoint(mousepos):
+        if mousepress[0] and CChavo.diff < 11 and CChavo.diff > -1 and Canpress == -1:
+            CChavo.diff += 1
+    if CFrederick.diff >= 11:
+        CFrederick.diff = 0
+    if CFrederick.diff <= -1:
+        CFrederick.diff = 10
+    if CFrederick.LR.collidepoint(mousepos):
+        if mousepress[0] and CFrederick.diff < 11 and CFrederick.diff > -1 and Canpress == -1:
+            CFrederick.diff -= 1
+    if CFrederick.RR.collidepoint(mousepos):
+        if mousepress[0] and CFrederick.diff < 11 and CFrederick.diff > -1 and Canpress == -1:
+            CFrederick.diff += 1
+    if CCody.diff >= 11:
+        CCody.diff = 0
+    if CCody.diff <= -1:
+        CCody.diff = 10
+    if CCody.LR.collidepoint(mousepos):
+        if mousepress[0] and CCody.diff < 11 and CCody.diff > -1 and Canpress == -1:
+            CCody.diff -= 1
+    if CCody.RR.collidepoint(mousepos):
+        if mousepress[0] and CCody.diff < 11 and CCody.diff > -1 and Canpress == -1:
+            CCody.diff += 1
+    if CCoby.diff >= 11:
+        CCoby.diff = 0
+    if CCoby.diff <= -1:
+        CCoby.diff = 10
+    if CCoby.LR.collidepoint(mousepos):
+        if mousepress[0] and CCoby.diff < 11 and CCoby.diff > -1 and Canpress == -1:
+            CCoby.diff -= 1
+    if CCoby.RR.collidepoint(mousepos):
+        if mousepress[0] and CCoby.diff < 11 and CCoby.diff > -1 and Canpress == -1:
+            CCoby.diff += 1
+    if CFred_Derrick.diff >= 11:
+        CFred_Derrick.diff = 0
+    if CFred_Derrick.diff <= -1:
+        CFred_Derrick.diff = 10
+    if CFred_Derrick.LR.collidepoint(mousepos):
+        if mousepress[0] and CFred_Derrick.diff < 11 and CFred_Derrick.diff > -1 and Canpress == -1:
+            CFred_Derrick.diff -= 1
+    if CFred_Derrick.RR.collidepoint(mousepos):
+        if mousepress[0] and CFred_Derrick.diff < 11 and CFred_Derrick.diff > -1 and Canpress == -1:
+            CFred_Derrick.diff += 1
+    if CCedrick.diff >= 11:
+        CCedrick.diff = 0
+    if CCedrick.diff <= -1:
+        CCedrick.diff = 10
+    if CCedrick.LR.collidepoint(mousepos):
+        if mousepress[0] and CCedrick.diff < 11 and CCedrick.diff > -1 and Canpress == -1:
+            CCedrick.diff -= 1
+    if CCedrick.RR.collidepoint(mousepos):
+        if mousepress[0] and CCedrick.diff < 11 and CCedrick.diff > -1 and Canpress == -1:
+            CCedrick.diff += 1
+    if BackbuttonRect.collidepoint(mousepos):
+        screen.blit(BackbuttonP, BackbuttonRect)
+        if mousepress[0]:
+            MainStack.pop()
+    if BeginButtonRect.collidepoint(mousepos):
+        screen.blit(BeginButtonP, BeginButtonRect)
+        if mousepress[0]:
+            Reset()
+            MainStack.append(Games)
+def Games():
+    global Game, Main, Win, Over, Power, Xcanpress, Ccanpress, Lcanpress, Rcanpress, LDPOS, RDPOS, FlashlightPOS, PowerDrain, Backdoor, Cams, elapsed_time
+    screen.blit(black, (0,0))
+    Power -= 1
+    if Xcanpress == False:
+        Xcanpress = Cooldown(Xcanpress, 2)
+    if Ccanpress == False:
+        Ccanpress = Cooldown(Ccanpress, 2)
+    if Lcanpress == False:
+        Lcanpress = Cooldown(Lcanpress, 1)
+    if Rcanpress == False:
+        Rcanpress = Cooldown(Rcanpress, 1)
+    if Main:
+        screen.blit(Office, (0,0))
+        screen.blit(Rdoor, (0,RDPOS))
+        screen.blit(Ldoor, (0,LDPOS))
+        screen.blit(Dark, (0,0))
+        PowerDisplay = PowerFont.render(str(Power//200)+"%", True, "White")
+        elapsed_time = (int(time.time()) - Time) * 2  # Double the elapsed time
+        if (elapsed_time // 60) >= 1:
+            TimeDisplay = PowerFont.render("TIME: " + str(elapsed_time // 60) + "AM", True, "White")
+        else:
+            TimeDisplay = PowerFont.render("TIME: " + str((elapsed_time // 60) + 12) + "AM", True, "White")
+        if keys[pygame.K_q] and Lcanpress:
+            LDPOS = DoorOpen("Left")
+            Lcanpress = False
+        if keys[pygame.K_e] and Rcanpress:
+            RDPOS = DoorOpen("Right")
+            Rcanpress = False
+        if keys[pygame.K_a] and FlashlightPOS != 0:
+            FlashlightPOS = 0
+        if keys[pygame.K_d] and FlashlightPOS != 2:
+            FlashlightPOS = 2
+        if keys[pygame.K_w] and FlashlightPOS != 3:
+            FlashlightPOS = 3
+        if keys[pygame.K_s] and FlashlightPOS != 1:
+            FlashlightPOS = 1
+        if FlashlightPOS == 0:
+            FX = -1700
+            FY = -500
+        if FlashlightPOS == 1:
+            FX = -1000
+            FY = -600
+        if FlashlightPOS == 2:
+            FX = -230
+            FY = -500
+        if FlashlightPOS == 3:
+            FX = -1400
+            FY = -1000
+        if PowerDrain != FlashlightPOS:
+            Power = Power - 20
+            PowerDrain = FlashlightPOS
+        if LDCLOSED:
+            Power -= 10
+        if RDCLOSED:
+            Power -= 10
+        screen.blit(Flashlight, (FX,FY))
+        screen.blit(PowerDisplay,(0,1000))
+        screen.blit(TimeDisplay, (0,0))
+        if keys[pygame.K_x] and Xcanpress:
+            Backdoor = True
+            Main = False
+            Xcanpress = False
+            print("Main to Back")
+        if keys[pygame.K_c] and Ccanpress:
+            Cams = True
+            Main = False
+            Ccanpress = False
+    if Backdoor:
+        screen.blit(black, (0,0))
+        screen.blit(Back, (0,0))
+        BACKCHSEFFECT()
+        screen.blit(Dark, (0,0))
+        if keys[pygame.K_x] and Xcanpress:
+            Main = True
+            Backdoor = False
+            Xcanpress = False
+            print("Back to Main")
+    if (elapsed_time // 60) == 6:
+        MainStack.append(Wins)
+    if Power <= 0:
+        MainStack.append(Overs)
+    if Cams:
+        Power -= 1
+        screen.blit(black, (0,0))
+        NumCam()
+        screen.blit(CurrentCam[CameraPos], (0,0))
+        CHSEFFECT()
+        screen.blit(Dark,(0,0))
+        if keys[pygame.K_c] and Ccanpress:
+            Main = True
+            Cams = False
+            Ccanpress = False
+def Wins():
+    global Cams, Backdoor, Main, Mainscreen, Win
+    Cams = False
+    Backdoor = False
+    Main = True
+    screen.blit(WinScreen, (0,0))
+    screen.blit(Menubutton, (MenubuttonRect))
+    if MenubuttonRect.collidepoint(mousepos):
+        screen.blit(MenubuttonP, MenubuttonRect)
+        if mousepress[0]:
+           MainStack.pop()
+def Overs():
+    global Cams, Backdoor, Main, Mainscreen, Over
+    Cams = False
+    Backdoor = False
+    Main = True
+    screen.blit(OverScreen, (0,0))
+    screen.blit(Menubutton, (MenubuttonRect))
+    if MenubuttonRect.collidepoint(mousepos):
+        screen.blit(MenubuttonP, MenubuttonRect)
+        if mousepress[0]:
+            MainStack.pop()
+MainStack = [MainScreen]
 #Main
 while True:
     mousepos = pygame.mouse.get_pos()
@@ -284,256 +528,6 @@ while True:
             pygame.quit()
             exit()
     keys = pygame.key.get_pressed()
-    if Mainscreen:
-        VHSEFFECT()
-        screen.blit(Title,(200, 200))
-        screen.blit(Playbutton, PlaybuttonRect)
-        screen.blit(Quitbutton, QuitbuttonRect)
-        screen.blit(Optionsbutton, OptionsbuttonRect)
-        screen.blit(CharliePFP, (1200, 600))
-        if PlaybuttonRect.collidepoint(mousepos):
-            screen.blit(PlaybuttonP, PlaybuttonRect)
-            if mousepress[0]:
-                Custom = True
-                Mainscreen = False
-        if OptionsbuttonRect.collidepoint(mousepos):
-            screen.blit(OptionsbuttonP, OptionsbuttonRect)
-            if mousepress[0]:
-                Options = True
-                Mainscreen = False
-        if QuitbuttonRect.collidepoint(mousepos):
-            screen.blit(QuitbuttonP, QuitbuttonRect)
-            if mousepress[0]:
-                pygame.quit()
-                exit()
-    if Custom: #Custom
-        CChavoText = PowerFont.render(str(CChavo.diff), True, "White")
-        CFrederickText = PowerFont.render(str(CFrederick.diff), True, "White")
-        CCodyText = PowerFont.render(str(CCody.diff), True, "White")
-        CCobyText = PowerFont.render(str(CCoby.diff), True, "White")
-        CCedrickText = PowerFont.render(str(CCedrick.diff), True, "White")
-        CFred_DerrickText = PowerFont.render(str(CFred_Derrick.diff), True, "White")
-        VHSEFFECT()
-        screen.blit(Customborders,(0,0))
-        screen.blit(Backbutton, BackbuttonRect)
-        screen.blit(BeginButton, BeginButtonRect)
-        screen.blit(CharacterBar1,(100, 25))
-        screen.blit(CharacterBar2,(80, 520))
-        screen.blit(CChavoText, (160, 265))
-        screen.blit(CChavo.pfp, (80, 80))
-        screen.blit(ArrowL, (CChavo.LR))
-        screen.blit(ArrowR, (CChavo.RR))
-        screen.blit(CFrederickText, (160, 555))
-        screen.blit(CFrederickPFP, (80, 340))
-        screen.blit(ArrowL, (CFrederick.LR))
-        screen.blit(ArrowR, (CFrederick.RR))
-        screen.blit(CCodyText, (400, 265))
-        screen.blit(CCodyPFP, (320,80))
-        screen.blit(ArrowL, (CCody.LR))
-        screen.blit(ArrowR, (CCody.RR))
-        screen.blit(CCobyText, (640, 265))
-        screen.blit(CCobyPFP, (560, 80))
-        screen.blit(ArrowL, (CCoby.LR))
-        screen.blit(ArrowR, (CCoby.RR))
-        screen.blit(CFred_DerrickText, (640, 555))
-        screen.blit(CFred_DerrickPFP, (560, 340))
-        screen.blit(ArrowL, (CFred_Derrick.LR))
-        screen.blit(ArrowR, (CFred_Derrick.RR))
-        screen.blit(CCedrickText, (400, 555))
-        screen.blit(CCedrickPFP, (320, 340))
-        screen.blit(ArrowL, (CCedrick.LR))
-        screen.blit(ArrowR, (CCedrick.RR))
-        if CChavo.diff >= 11: #Custom difficulty selection for each character
-            CChavo.diff = 0
-        if CChavo.diff <= -1:
-            CChavo.diff = 10
-        if CChavo.LR.collidepoint(mousepos):
-            if mousepress[0] and CChavo.diff < 11 and CChavo.diff > -1 and Canpress == -1:
-                CChavo.diff -= 1
-        if CChavo.RR.collidepoint(mousepos):
-            if mousepress[0] and CChavo.diff < 11 and CChavo.diff > -1 and Canpress == -1:
-                CChavo.diff += 1
-        if CFrederick.diff >= 11:
-            CFrederick.diff = 0
-        if CFrederick.diff <= -1:
-            CFrederick.diff = 10
-        if CFrederick.LR.collidepoint(mousepos):
-            if mousepress[0] and CFrederick.diff < 11 and CFrederick.diff > -1 and Canpress == -1:
-                CFrederick.diff -= 1
-        if CFrederick.RR.collidepoint(mousepos):
-            if mousepress[0] and CFrederick.diff < 11 and CFrederick.diff > -1 and Canpress == -1:
-                CFrederick.diff += 1
-        if CCody.diff >= 11:
-            CCody.diff = 0
-        if CCody.diff <= -1:
-            CCody.diff = 10
-        if CCody.LR.collidepoint(mousepos):
-            if mousepress[0] and CCody.diff < 11 and CCody.diff > -1 and Canpress == -1:
-                CCody.diff -= 1
-        if CCody.RR.collidepoint(mousepos):
-            if mousepress[0] and CCody.diff < 11 and CCody.diff > -1 and Canpress == -1:
-                CCody.diff += 1
-        if CCoby.diff >= 11:
-            CCoby.diff = 0
-        if CCoby.diff <= -1:
-            CCoby.diff = 10
-        if CCoby.LR.collidepoint(mousepos):
-            if mousepress[0] and CCoby.diff < 11 and CCoby.diff > -1 and Canpress == -1:
-                CCoby.diff -= 1
-        if CCoby.RR.collidepoint(mousepos):
-            if mousepress[0] and CCoby.diff < 11 and CCoby.diff > -1 and Canpress == -1:
-                CCoby.diff += 1
-        if CFred_Derrick.diff >= 11:
-            CFred_Derrick.diff = 0
-        if CFred_Derrick.diff <= -1:
-            CFred_Derrick.diff = 10
-        if CFred_Derrick.LR.collidepoint(mousepos):
-            if mousepress[0] and CFred_Derrick.diff < 11 and CFred_Derrick.diff > -1 and Canpress == -1:
-                CFred_Derrick.diff -= 1
-        if CFred_Derrick.RR.collidepoint(mousepos):
-            if mousepress[0] and CFred_Derrick.diff < 11 and CFred_Derrick.diff > -1 and Canpress == -1:
-                CFred_Derrick.diff += 1
-        if CCedrick.diff >= 11:
-            CCedrick.diff = 0
-        if CCedrick.diff <= -1:
-            CCedrick.diff = 10
-        if CCedrick.LR.collidepoint(mousepos):
-            if mousepress[0] and CCedrick.diff < 11 and CCedrick.diff > -1 and Canpress == -1:
-                CCedrick.diff -= 1
-        if CCedrick.RR.collidepoint(mousepos):
-            if mousepress[0] and CCedrick.diff < 11 and CCedrick.diff > -1 and Canpress == -1:
-                CCedrick.diff += 1
-        if BackbuttonRect.collidepoint(mousepos):
-            screen.blit(BackbuttonP, BackbuttonRect)
-            if mousepress[0]:
-                Custom = False
-                Mainscreen = True
-        if BeginButtonRect.collidepoint(mousepos):
-            screen.blit(BeginButtonP, BeginButtonRect)
-            if mousepress[0]:
-                Reset()
-                Game = True
-                Custom = False
-    if Game: #when game is active // at any point in the game
-        screen.blit(black, (0,0))
-        Power -= 1
-        if Xcanpress == False:
-          Xcanpress = Cooldown(Xcanpress, 2)
-        if Ccanpress == False:
-          Ccanpress = Cooldown(Ccanpress, 2)
-        if Lcanpress == False:
-            Lcanpress = Cooldown(Lcanpress, 1)
-        if Rcanpress == False:
-            Rcanpress = Cooldown(Rcanpress, 1)
-        if Main:
-            screen.blit(Office, (0,0))
-            screen.blit(Rdoor, (0,RDPOS))
-            screen.blit(Ldoor, (0,LDPOS))
-            screen.blit(Dark, (0,0))
-            PowerDisplay = PowerFont.render(str(Power//200)+"%", True, "White")
-            elapsed_time = (int(time.time()) - Time) * 2  # Double the elapsed time
-            if (elapsed_time // 60) >= 1:
-                TimeDisplay = PowerFont.render("TIME: " + str(elapsed_time // 60) + "AM", True, "White")
-            else:
-                TimeDisplay = PowerFont.render("TIME: " + str((elapsed_time // 60) + 12) + "AM", True, "White")
-            if keys[pygame.K_q] and Lcanpress:
-                LDPOS = DoorOpen("Left")
-                Lcanpress = False
-            if keys[pygame.K_e] and Rcanpress:
-                RDPOS = DoorOpen("Right")
-                Rcanpress = False
-            if keys[pygame.K_a] and FlashlightPOS != 0:
-                FlashlightPOS = 0
-            if keys[pygame.K_d] and FlashlightPOS != 2:
-                FlashlightPOS = 2
-            if keys[pygame.K_w] and FlashlightPOS != 3:
-                FlashlightPOS = 3
-            if keys[pygame.K_s] and FlashlightPOS != 1:
-                FlashlightPOS = 1
-            if FlashlightPOS == 0:
-                FX = -1700
-                FY = -500
-            if FlashlightPOS == 1:
-                FX = -1000
-                FY = -600
-            if FlashlightPOS == 2:
-                FX = -230
-                FY = -500
-            if FlashlightPOS == 3:
-                FX = -1400
-                FY = -1000
-            if PowerDrain != FlashlightPOS:
-                Power = Power - 20
-                PowerDrain = FlashlightPOS
-            if LDCLOSED:
-                Power -= 10
-            if RDCLOSED:
-                Power -= 10
-            screen.blit(Flashlight, (FX,FY))
-            screen.blit(PowerDisplay,(0,1000))
-            screen.blit(TimeDisplay, (0,0))
-            if keys[pygame.K_x] and Xcanpress:
-                Backdoor = True
-                Main = False
-                Xcanpress = False
-                print("Main to Back")
-            if keys[pygame.K_c] and Ccanpress:
-                Cams = True
-                Main = False
-                Ccanpress = False
-        if Backdoor:
-            screen.blit(black, (0,0))
-            screen.blit(Back, (0,0))
-            BACKCHSEFFECT()
-            screen.blit(Dark, (0,0))
-            if keys[pygame.K_x] and Xcanpress:
-                Main = True
-                Backdoor = False
-                Xcanpress = False
-                print("Back to Main")
-        if (elapsed_time // 60) == 6:
-            Game = False
-            Win = True
-        else:
-            Win = False
-        if Power <= 0:
-            Game = False
-            Over = True
-        if Power > 0:
-            Over = False
-        if Cams:
-            Power -= 1
-            screen.blit(black, (0,0))
-            NumCam()
-            screen.blit(CurrentCam[CameraPos], (0,0))
-            CHSEFFECT()
-            screen.blit(Dark,(0,0))
-            
-            if keys[pygame.K_c] and Ccanpress:
-                Main = True
-                Cams = False
-                Ccanpress = False
-    if Win:
-        Cams = False
-        Backdoor = False
-        Main = True
-        screen.blit(WinScreen, (0,0))
-        screen.blit(Menubutton, (MenubuttonRect))
-        if MenubuttonRect.collidepoint(mousepos):
-            screen.blit(MenubuttonP, MenubuttonRect)
-            if mousepress[0]:
-                Mainscreen = True
-                Win = False
-    if Over:
-        Cams = False
-        Backdoor = False
-        Main = True
-        screen.blit(OverScreen, (0,0))
-        screen.blit(Menubutton, (MenubuttonRect))
-        if MenubuttonRect.collidepoint(mousepos):
-            screen.blit(MenubuttonP, MenubuttonRect)
-            if mousepress[0]:
-                Mainscreen = True
-                Over = False
+    MainStack[len(MainStack)-1]()
     pygame.display.update()
-    clock.tick(60)
+    clock.tick(60)   
