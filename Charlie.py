@@ -399,7 +399,7 @@ def Customs():
 def Games():
     global Game, Main, Win, Over, Power, Xcanpress, Ccanpress, Lcanpress, Rcanpress, LDPOS, RDPOS, FlashlightPOS, PowerDrain, Backdoor, Cams, elapsed_time
     screen.blit(black, (0,0))
-    Power -= 1
+    Power -= 2
     if Xcanpress == False:
         Xcanpress = Cooldown(Xcanpress, 2)
     if Ccanpress == False:
@@ -500,6 +500,8 @@ def Wins():
         screen.blit(MenubuttonP, MenubuttonRect)
         if mousepress[0]:
            MainStack.pop()
+           MainStack.pop()
+           MainStack.pop()
 def Overs():
     global Cams, Backdoor, Main, Mainscreen, Over
     Cams = False
@@ -510,6 +512,8 @@ def Overs():
     if MenubuttonRect.collidepoint(mousepos):
         screen.blit(MenubuttonP, MenubuttonRect)
         if mousepress[0]:
+            MainStack.pop()
+            MainStack.pop()
             MainStack.pop()
 MainStack = [MainScreen]
 #Main
