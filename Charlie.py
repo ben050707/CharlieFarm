@@ -24,7 +24,7 @@ Main = True
 Cams = False
 Backdoor = False
 def Reset(): #resets values to default everytime player starts a new agme
-    global Power, FlashlightPOS, FX, FY, PowerDrain, CameraPos, Time, CDstart, CDtime, LDCLOSED, RDCLOSED, Over, Win
+    global Power, FlashlightPOS, FlashlightON, FX, FY, PowerDrain, CameraPos, Time, CDstart, CDtime, LDCLOSED, RDCLOSED, Over, Win
     Power = 20000
     FlashlightPOS = 1
     FX = -230
@@ -38,18 +38,28 @@ def Reset(): #resets values to default everytime player starts a new agme
     RDCLOSED = False
     Over = False
     Win = False
+    FlashlightON = False
 
 
 #Mechanics
 Dark = pygame.image.load("Data/Mechanics/Dark.png")
 Flashlight = pygame.image.load("Data/Mechanics/flashlight.png")
+Flashlightoff = pygame.image.load("Data/Mechanics/flashlightoff.png")
+FlashlightON = False
 Power = 0
 FX = -800
 FY = -400
 Time = 10000
 
+def Flashlightswap():
+    global FlashlightON
+    if FlashlightON:
+        FlashlightON = False
+    else:
+        FlashlightON = True
 
 #COOLDOWNS
+Spacecanpress = True
 Xcanpress = True
 Ccanpress = True
 Lcanpress = True
@@ -397,7 +407,7 @@ def Customs():
             Reset()
             MainStack.append(Games)
 def Games():
-    global Game, Main, Win, Over, Power, Xcanpress, Ccanpress, Lcanpress, Rcanpress, LDPOS, RDPOS, FlashlightPOS, PowerDrain, Backdoor, Cams, elapsed_time
+    global Game, Main, Win, Over, Power, Xcanpress, Ccanpress, Lcanpress, Rcanpress, Spacecanpress, LDPOS, RDPOS, FlashlightPOS, FlashlightON, PowerDrain, Backdoor, Cams, elapsed_time
     screen.blit(black, (0,0))
     Power -= 2
     if Xcanpress == False:
@@ -408,6 +418,8 @@ def Games():
         Lcanpress = Cooldown(Lcanpress, 1)
     if Rcanpress == False:
         Rcanpress = Cooldown(Rcanpress, 1)
+    if Spacecanpress == False:
+        Spacecanpress = Cooldown(Spacecanpress, 1)
     if Main:
         screen.blit(Office, (0,0))
         screen.blit(Rdoor, (0,RDPOS))
@@ -425,6 +437,8 @@ def Games():
         if keys[pygame.K_e] and Rcanpress:
             RDPOS = DoorOpen("Right")
             Rcanpress = False
+        if keys[pygame.K_SPACE] and Spacecanpress:
+            Flashlightswap()
         if keys[pygame.K_a] and FlashlightPOS != 0:
             FlashlightPOS = 0
         if keys[pygame.K_d] and FlashlightPOS != 2:
@@ -445,14 +459,16 @@ def Games():
         if FlashlightPOS == 3:
             FX = -1400
             FY = -1000
-        if PowerDrain != FlashlightPOS:
-            Power = Power - 20
-            PowerDrain = FlashlightPOS
+        if FlashlightON:
+            Power -= 20
         if LDCLOSED:
             Power -= 10
         if RDCLOSED:
             Power -= 10
-        screen.blit(Flashlight, (FX,FY))
+        if FlashlightON:
+            screen.blit(Flashlight, (FX,FY))
+        if not FlashlightON:
+            screen.blit(Flashlightoff, (-1000, -600))
         screen.blit(PowerDisplay,(0,1000))
         screen.blit(TimeDisplay, (0,0))
         if keys[pygame.K_x] and Xcanpress:
