@@ -1,4 +1,5 @@
 import pygame
+import random
 import time
 pygame.init()
 screen = pygame.display.set_mode((1920,1080))
@@ -39,6 +40,7 @@ def Reset(): #resets values to default everytime player starts a new agme
     Over = False
     Win = False
     FlashlightON = False
+    Coby.Position = 0
 
 
 #Mechanics
@@ -59,13 +61,14 @@ def Flashlightswap():
         FlashlightON = True
 
 #COOLDOWNS
+Tick = True
 Spacecanpress = True
 Xcanpress = True
 Ccanpress = True
 Lcanpress = True
 Rcanpress = True
 def Cooldown(CD, MAX): #cooldown function to set a CD to be MAX seconds long
-    global Xcanpress, Ccanpress, CDstart, CDtime
+    global Xcanpress, Ccanpress, Tick, CDstart, CDtime
     if CDstart == True:
         CDtime = int(time.time())
         CDstart = False
@@ -216,6 +219,8 @@ UWall = map_import("Data/map/UpWall.png")
 UHall = map_import("Data/Map/UpHall.png")
 FHall = map_import("Data/Map/FrontHall.png")
 
+
+
 #CustomCharacters
 CharacterBar1 = PowerFont.render(" Chavo                Cody                 Coby", True, "White")
 CharacterBar2 = PowerFont.render(" Frederick           Cedrick         Fred-Derrick", True, "White")
@@ -247,7 +252,6 @@ CCoby = CustomChar(0, CCobyPFP, ArrowL.get_rect(center = (600, 280)), ArrowR.get
 CFrederick = CustomChar(0, CFrederickPFP, ArrowL.get_rect(center = (120, 570)), ArrowR.get_rect(center = (220, 570)))
 CCedrick = CustomChar(0, CCedrickPFP, ArrowL.get_rect(center = (360, 570)), ArrowR.get_rect(center = (460, 570)))
 CFred_Derrick = CustomChar(0, CFred_DerrickPFP, ArrowL.get_rect(center = (600, 570)), ArrowR.get_rect(center = (700, 570)))
-
 #example skibis
 class rizz():
     def __init__(self, edge, mog, skibid, edgemod):
@@ -255,7 +259,25 @@ class rizz():
         self.edge = edge
         self.mog = mog
 
+#Coby
+CobyOrigin = pygame.image.load("Data/Char/Coby/CobyRest.png")
+CobyHall = pygame.image.load("Data/Char/Coby/CobyHall.png")
+CobyWall = pygame.image.load("Data/Char/Coby/CobyWall.png")
+CobyIn = pygame.image.load("Data/Char/Coby/CobyIn.png")
+CobyJumpscare = pygame.image.load("Data/Char/Coby/CobyJumpscare.png")
 
+#Characters
+class Character():
+    def __init__(self, Origin, Hall, Wall, In, Jumpscare, Position, Name):
+        self.Origin = Origin
+        self.Hall = Hall
+        self.Wall = Wall
+        self.In = In
+        self.Jumpscare = Jumpscare
+        self.Position = Position
+        self.Name = Name
+Coby = Character(CobyOrigin, CobyHall, CobyWall, CobyIn, CobyJumpscare, 0, "Coby")
+print(Coby.Name)
 #Camera states
 Changepos = 0
 CameraPos = 0
@@ -410,16 +432,18 @@ def Games():
     global Game, Main, Win, Over, Power, Xcanpress, Ccanpress, Lcanpress, Rcanpress, Spacecanpress, LDPOS, RDPOS, FlashlightPOS, FlashlightON, PowerDrain, Backdoor, Cams, elapsed_time
     screen.blit(black, (0,0))
     Power -= 2
-    if Xcanpress == False:
+    if not Xcanpress:
         Xcanpress = Cooldown(Xcanpress, 2)
-    if Ccanpress == False:
+    if not Ccanpress:
         Ccanpress = Cooldown(Ccanpress, 2)
-    if Lcanpress == False:
+    if not Lcanpress:
         Lcanpress = Cooldown(Lcanpress, 1)
-    if Rcanpress == False:
+    if not Rcanpress:
         Rcanpress = Cooldown(Rcanpress, 1)
-    if Spacecanpress == False:
+    if not Spacecanpress:
         Spacecanpress = Cooldown(Spacecanpress, 1)
+    if not Tick:
+        Tick = Cooldown(Tick, 2)
     if Main:
         screen.blit(Office, (0,0))
         screen.blit(Rdoor, (0,RDPOS))
