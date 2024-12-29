@@ -429,7 +429,7 @@ def Customs():
             Reset()
             MainStack.append(Games)
 def Games():
-    global Game, Main, Win, Over, Power, Xcanpress, Ccanpress, Lcanpress, Rcanpress, Spacecanpress, LDPOS, RDPOS, FlashlightPOS, FlashlightON, PowerDrain, Backdoor, Cams, elapsed_time
+    global Game, Main, Win, Over, Power, Xcanpress, Ccanpress, Lcanpress, Rcanpress, Spacecanpress, LDPOS, RDPOS, Tick, FlashlightPOS, FlashlightON, PowerDrain, Backdoor, Cams, elapsed_time
     screen.blit(black, (0,0))
     Power -= 2
     if not Xcanpress:
