@@ -11,6 +11,12 @@ center = (600, 450)
 transparent = (0, 0, 0, 0)
 canpress = True
 cooldowntimer = 0
+
+
+#ADD COOLDOWNS
+#ADD RAIN EFFECT
+#ADD DOORS
+
 #Cooldowwn function
 def cooldown(seconds):
     global canpress, cooldowntimer
@@ -21,6 +27,13 @@ def cooldown(seconds):
             canpress = True
             cooldowntimer = 0
             break
+
+# Image Import Function
+
+def imgimport(img, size):
+    newmap = pygame.image.load(img).convert_alpha()
+    newmap = pygame.transform.scale(newmap,(size))
+    return newmap
 
 # VHS effect
 VHS = []
@@ -35,6 +48,9 @@ def vhs(screen):
     VHSINDEX += 1
     if VHSINDEX >= len(VHS):
         VHSINDEX = 0
+
+#Rain effect
+
 #==================================================================================================#
 
 #Mainscreen Buttons
@@ -75,17 +91,32 @@ beginbuttonrect = beginbutton.get_rect(center = (1500, 850))
 
 # Character Class
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, name, diffculty, pathing, jumpscare, posarray):
+    def __init__(self, name, diffculty):
         super().__init__()
         self.name = name
         self.diffculty = diffculty
-        self.pathing = pathing
-        self.jumpscare = jumpscare
-        self.posarray = posarray
+        self.pos = 3
+        self.image = None
 
-    
-    def update(self):
+    def iskilled(self):
         pass
+
+    def killplayer(self):
+        pass
+
+    def move(self):
+        pass
+
+    def display(self):
+        global camerapos, incameras
+        print(str(incameras))
+        if camerapos == self.pos and incameras:
+            screen.blit(self.image, (400, 400))
+
+    def update(self):
+        self.display()
+
+
 
 class CustomEnemy(pygame.sprite.Sprite):
     def __init__(self, name, difficulty, pfp, pfpx, pfpy):
@@ -124,6 +155,7 @@ class CustomEnemy(pygame.sprite.Sprite):
 
 #Groups
 customenemygroup = pygame.sprite.Group()
+enemygroup = pygame.sprite.Group()
 #==================================================================================================#
 
 # Mainscreen
@@ -159,7 +191,22 @@ customenemygroup.add(CustomEnemy("Cody", 0, pygame.image.load("Data/States/Custo
 customenemygroup.add(CustomEnemy("FredDerick", 0, pygame.image.load("Data/States/Custom/Fred_Derrick.png"), 770, 510))
 
 
+#Real Enemies
 
+class Coby(Enemy):
+    def __init__(self, name, diffculty, pathing, jumpscare, posarray):
+        super().__init__(name, diffculty)
+        self.rest = pygame.image.load("Data/Characters/Coby/CobyRest.png")
+        self.hall = pygame.image.load("Data/Characters/Coby/CobyHall.png")
+        self.wall = pygame.image.load("Data/Characters/Coby/CobyWall.png")
+        self.office = pygame.image.load("Data/Characters/Coby/CobyIn.png")
+        self.jumpscare = imgimport("Data/Characters/Coby/CobyJumpscare.png", (1920, 1080))
+        self.image = self.rest
+
+    def movement(self):
+        pass
+
+enemygroup.add(Coby("Coby", 0, 0, 0, 0))
 #==================================================================================================#
 # Customscreen
 def customscreen(screen):
@@ -169,6 +216,108 @@ def customscreen(screen):
     screen.blit(beginbutton, beginbuttonrect)
     customenemygroup.draw(screen)
     customenemygroup.update()
+    if backbuttonrect.collidepoint(mousepos):
+        screen.blit(backbuttonp, backbuttonrect)
+        if mousepress[0]:
+            States.pop()
+    if beginbuttonrect.collidepoint(mousepos):
+        screen.blit(beginbuttonp, beginbuttonrect)
+        if mousepress[0]:
+            States.append(game)
+
+# Game Map
+
+office = imgimport("Data/States/Map/Office.png", (1920, 1080))
+back = imgimport("Data/States/Map/Back.png", (1920, 1080))
+dark = imgimport("Data/States/Mechanics/Dark.png", (1920, 1080))
+coop = imgimport("Data/States/Map/Coop.png", (1920, 1080))
+lwall = imgimport("Data/States/Map/LeftWall.png", (1920, 1080))
+lhall = imgimport("Data/States/Map/LeftHall.png", (1920, 1080))
+rwall = imgimport("Data/States/Map/RightWall.png", (1920, 1080))
+rhall = imgimport("Data/States/Map/RightHall.png", (1920, 1080))
+uwall = imgimport("Data/States/map/UpWall.png", (1920, 1080))
+uhall = imgimport("Data/States/Map/UpHall.png", (1920, 1080))
+fhall = imgimport("Data/States/Map/FrontHall.png", (1920, 1080))
+
+#mechanics
+
+flashlight = imgimport("Data/States/Mechanics/Flashlight.png", (1920, 1080))
+rdoor = imgimport("Data/States/Mechanics/RDoor.png", (1920, 1080))
+ldoor = imgimport("Data/States/Mechanics/LDoor.png", (1920, 1080))
+
+# Camera function
+# Gameplay variables
+inoffice = True
+flashlighton = False
+flashlightpos = (-1000, -600)
+incameras = False
+camerapos = 1
+cameraposarray = [0, lwall, lhall, coop, rhall, rwall, fhall, uhall, uwall]
+inback = False
+
+def numcam():
+    global camerapos
+    if keys[pygame.K_1]:
+        camerapos = 1
+    if keys[pygame.K_2]:
+        camerapos = 2
+    if keys[pygame.K_3]:
+        camerapos = 3
+    if keys[pygame.K_4]:
+        camerapos = 4
+    if keys[pygame.K_5]:
+        camerapos = 5
+    if keys[pygame.K_6]:
+        camerapos = 6
+    if keys[pygame.K_7]:
+        camerapos = 7
+    if keys[pygame.K_8]:
+        camerapos = 8
+# Game
+def game(screen):
+    global inoffice, flashlighton, flashlightpos, incameras, inback
+    if inoffice:
+        screen.blit(office, (0, 0))
+        screen.blit(rdoor, (0, 0))
+        screen.blit(ldoor, (0, 0))
+        if keys[pygame.K_SPACE] and not flashlighton:
+            flashlighton = True
+        if keys[pygame.K_SPACE] and flashlighton:
+            flashlighton = False
+        if keys[pygame.K_s]:
+            flashlightpos = (-1000, -600)
+        if keys[pygame.K_a]:
+            flashlightpos = (-1700, -500)
+        if keys[pygame.K_d]:
+            flashlightpos = (-230, -500)
+        if keys[pygame.K_w]:
+            flashlightpos = (-1400, -1000)
+        if keys[pygame.K_c]:
+            incameras = True
+            inoffice = False
+        if keys[pygame.K_x]:
+            inback = True
+            inoffice = False
+        if not flashlighton:
+            screen.blit(dark, (0, 0))
+        if flashlighton:
+            screen.blit(flashlight, flashlightpos)
+    if incameras:
+        screen.fill((0, 0, 0))
+        numcam()
+        screen.blit(cameraposarray[camerapos], (0, 0))
+        screen.blit(dark, (0, 0))
+        if keys[pygame.K_c]:
+            inoffice = True
+            incameras = False
+    if inback:
+        screen.fill((0, 0, 0))
+        screen.blit(back, (0, 0))
+        screen.blit(dark, (0, 0))
+        if keys[pygame.K_x]:
+            inoffice = True
+            inback = False
+    enemygroup.update()
 # Main loop
 States = [mainscreen]
 
