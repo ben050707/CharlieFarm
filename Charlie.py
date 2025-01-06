@@ -9,25 +9,25 @@ clock = pygame.time.Clock()
 powerfont = pygame.font.Font(None, 50)
 center = (600, 450)
 transparent = (0, 0, 0, 0)
-canpress = True
-cooldowntimer = 0
 
 
-#ADD COOLDOWNS
-#ADD RAIN EFFECT
-#ADD DOORS
+#FIX FLASHLIGHT POSITION
+# ADD CEDRICK CLASS
+#ADD POWER AND TIME DISPLAY
+#AND WIN/LOSE SCREENS
 
-#Cooldowwn function
-def cooldown(seconds):
-    global canpress, cooldowntimer
-    canpress = False
-    while canpress == False:
-        cooldowntimer += 1
-        if cooldowntimer >= seconds * 600:
-            canpress = True
-            cooldowntimer = 0
-            break
 
+#i made a dictionary for cooldown function
+cooldowns = {}
+
+def cooldown(key, duration): 
+    current_time = time.time()
+    if key not in cooldowns or current_time - cooldowns[key] >= duration:
+        cooldowns[key] = current_time
+        return True
+    return False
+
+    
 # Image Import Function
 
 def imgimport(img, size):
@@ -50,7 +50,19 @@ def vhs(screen):
         VHSINDEX = 0
 
 #Rain effect
+CHS = []
+for i in range(7):
+    CHS.append(f"Data/States/Map/Rain/{i}.png")
+    CHS[i] = imgimport(CHS[i], (1920, 1080))
 
+CHSINDEX = 0
+
+def rain(screen):
+    global CHSINDEX
+    screen.blit(CHS[CHSINDEX], (0, 0))
+    CHSINDEX += 1
+    if CHSINDEX >= len(CHS):
+        CHSINDEX = 0
 #==================================================================================================#
 
 #Mainscreen Buttons
@@ -109,7 +121,6 @@ class Enemy(pygame.sprite.Sprite):
 
     def display(self):
         global camerapos, incameras
-        print(str(incameras))
         if camerapos == self.pos and incameras:
             screen.blit(self.image, (400, 400))
 
@@ -132,19 +143,16 @@ class CustomEnemy(pygame.sprite.Sprite):
         self.rectright = arrowr.get_rect(center = (self.pfpx + 75, self.pfpy + 125))
 
     def arrowdisplay(self):
-        global canpress
         screen.blit(arrowl, self.rectleft)
         screen.blit(arrowr, self.rectright)
         difficultydisplay = powerfont.render(str(self.difficulty), True, "White")
         screen.blit(difficultydisplay, (self.pfpx, self.pfpy + 125))
         if self.rectleft.collidepoint(mousepos):
-            if mousepress[0] and self.difficulty > 0 and canpress:
+            if mousepress[0] and self.difficulty > 0 and cooldown("arrow_left", 0.5):
                 self.difficulty -= 1
-                cooldown(60)
         if self.rectright.collidepoint(mousepos):
-            if mousepress[0] and self.difficulty < 10 and canpress:
+            if mousepress[0] and self.difficulty < 10 and cooldown("arrow_right", 0.5):
                 self.difficulty += 1
-                cooldown(60)
     
     def reset(self):
         self.difficulty = 0
@@ -245,7 +253,7 @@ flashlight = imgimport("Data/States/Mechanics/Flashlight.png", (1920, 1080))
 rdoor = imgimport("Data/States/Mechanics/RDoor.png", (1920, 1080))
 ldoor = imgimport("Data/States/Mechanics/LDoor.png", (1920, 1080))
 
-# Camera function
+
 # Gameplay variables
 inoffice = True
 flashlighton = False
@@ -255,6 +263,7 @@ camerapos = 1
 cameraposarray = [0, lwall, lhall, coop, rhall, rwall, fhall, uhall, uwall]
 inback = False
 
+# Camera function
 def numcam():
     global camerapos
     if keys[pygame.K_1]:
@@ -273,16 +282,46 @@ def numcam():
         camerapos = 7
     if keys[pygame.K_8]:
         camerapos = 8
+
+#Door Variables
+drpos = -500
+dlpos = -500
+dlclosed = False
+drclosed = False
+
+#Door Function
+def door(side):
+    global drpos, dlpos, dlclosed, drclosed
+    if side == "r":
+        if drclosed:
+            drpos = -500
+            drclosed = False
+        else:
+            drpos = 0
+            drclosed = True
+    if side == "l":
+        if dlclosed:
+            dlpos = -500
+            dlclosed = False
+        else:
+            dlpos = 0
+            dlclosed = True
+
 # Game
 def game(screen):
     global inoffice, flashlighton, flashlightpos, incameras, inback
     if inoffice:
+        screen.fill((0, 0, 0))
+        screen.blit(rdoor, (0, drpos))
+        screen.blit(ldoor, (0, dlpos))
         screen.blit(office, (0, 0))
-        screen.blit(rdoor, (0, 0))
-        screen.blit(ldoor, (0, 0))
-        if keys[pygame.K_SPACE] and not flashlighton:
+        if keys[pygame.K_q] and cooldown("ldoor", 0.5):
+            door("l")
+        if keys[pygame.K_e] and cooldown("rdoor", 0.5):
+            door("r")
+        if keys[pygame.K_SPACE] and not flashlighton and cooldown("flashlight", 0.2):
             flashlighton = True
-        if keys[pygame.K_SPACE] and flashlighton:
+        if keys[pygame.K_SPACE] and flashlighton and cooldown("flashlight", 0.2):
             flashlighton = False
         if keys[pygame.K_s]:
             flashlightpos = (-1000, -600)
@@ -292,10 +331,10 @@ def game(screen):
             flashlightpos = (-230, -500)
         if keys[pygame.K_w]:
             flashlightpos = (-1400, -1000)
-        if keys[pygame.K_c]:
+        if keys[pygame.K_c] and cooldown("cameras", 0.2):
             incameras = True
             inoffice = False
-        if keys[pygame.K_x]:
+        if keys[pygame.K_x] and cooldown("back", 0.2):
             inback = True
             inoffice = False
         if not flashlighton:
@@ -306,15 +345,17 @@ def game(screen):
         screen.fill((0, 0, 0))
         numcam()
         screen.blit(cameraposarray[camerapos], (0, 0))
+        if camerapos != 6:
+            rain(screen)
         screen.blit(dark, (0, 0))
-        if keys[pygame.K_c]:
+        if keys[pygame.K_c] and cooldown("cameras", 0.2):
             inoffice = True
             incameras = False
     if inback:
         screen.fill((0, 0, 0))
         screen.blit(back, (0, 0))
         screen.blit(dark, (0, 0))
-        if keys[pygame.K_x]:
+        if keys[pygame.K_x] and cooldown("back", 0.2):
             inoffice = True
             inback = False
     enemygroup.update()
@@ -329,6 +370,7 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
+    time2dp = round(time.time(),2)
     
     # Clear the screen
     screen.fill((0, 0, 0))
