@@ -10,9 +10,6 @@ powerfont = pygame.font.Font(None, 50)
 center = (600, 450)
 transparent = (0, 0, 0, 0)
 
-
-#FIX FLASHLIGHT POSITION
-# ADD CEDRICK CLASS
 #ADD POWER AND TIME DISPLAY
 #AND WIN/LOSE SCREENS
 
@@ -197,6 +194,7 @@ customenemygroup.add(CustomEnemy("Chavo", 0, pygame.image.load("Data/States/Cust
 customenemygroup.add(CustomEnemy("Frederick", 0, pygame.image.load("Data/States/Custom/Frederick.png"), 1010, 250))
 customenemygroup.add(CustomEnemy("Cody", 0, pygame.image.load("Data/States/Custom/Cody.png"), 530, 510))
 customenemygroup.add(CustomEnemy("FredDerick", 0, pygame.image.load("Data/States/Custom/Fred_Derrick.png"), 770, 510))
+customenemygroup.add(CustomEnemy("Cedrick", 0, pygame.image.load("Data/States/Custom/Cedrick.png"), 1010, 510))
 
 
 #Real Enemies
@@ -249,7 +247,7 @@ fhall = imgimport("Data/States/Map/FrontHall.png", (1920, 1080))
 
 #mechanics
 
-flashlight = imgimport("Data/States/Mechanics/Flashlight.png", (1920, 1080))
+flashlight = pygame.image.load("Data/States/Mechanics/Flashlight.png")
 rdoor = imgimport("Data/States/Mechanics/RDoor.png", (1920, 1080))
 ldoor = imgimport("Data/States/Mechanics/LDoor.png", (1920, 1080))
 
@@ -324,7 +322,7 @@ def game(screen):
         if keys[pygame.K_SPACE] and flashlighton and cooldown("flashlight", 0.2):
             flashlighton = False
         if keys[pygame.K_s]:
-            flashlightpos = (-1000, -600)
+            flashlightpos = (-1000, -600)#-1400, -1000
         if keys[pygame.K_a]:
             flashlightpos = (-1700, -500)
         if keys[pygame.K_d]:
