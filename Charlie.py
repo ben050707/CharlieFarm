@@ -9,7 +9,7 @@ clock = pygame.time.Clock()
 powerfont = pygame.font.Font(None, 50)
 center = (600, 450)
 transparent = (0, 0, 0, 0)
-
+rawtime = int(time.time())
 #ADD POWER AND TIME DISPLAY
 #AND WIN/LOSE SCREENS
 
@@ -178,7 +178,7 @@ def mainscreen(screen):
     if playbuttonrect.collidepoint(mousepos):
         screen.blit(playbuttonp, playbuttonrect)
         if mousepress[0]:
-            States.append(customscreen)
+            states.append(customscreen)
     if optionsbuttonrect.collidepoint(mousepos):
         screen.blit(optionsbuttonp, optionsbuttonrect)
     if quitbuttonrect.collidepoint(mousepos):
@@ -225,11 +225,11 @@ def customscreen(screen):
     if backbuttonrect.collidepoint(mousepos):
         screen.blit(backbuttonp, backbuttonrect)
         if mousepress[0]:
-            States.pop()
+            states.pop()
     if beginbuttonrect.collidepoint(mousepos):
         screen.blit(beginbuttonp, beginbuttonrect)
         if mousepress[0]:
-            States.append(game)
+            states.append(game)
 
 # Game Map
 
@@ -260,6 +260,7 @@ incameras = False
 camerapos = 1
 cameraposarray = [0, lwall, lhall, coop, rhall, rwall, fhall, uhall, uwall]
 inback = False
+power = 20000
 
 # Camera function
 def numcam():
@@ -307,12 +308,21 @@ def door(side):
 
 # Game
 def game(screen):
-    global inoffice, flashlighton, flashlightpos, incameras, inback
+    global inoffice, flashlighton, flashlightpos, incameras, inback, power, rawtime
+    power -= 2
     if inoffice:
+        powerdisplay = powerfont.render(str(power//200)+"%", True, "White")
+        elapsed_time = (int(time.time()) - rawtime) * 2  # Double the elapsed time
+        if (elapsed_time // 60) >= 1:
+            TimeDisplay = powerfont.render("TIME: " + str(elapsed_time // 60) + "AM", True, "White")
+        else:
+            TimeDisplay = powerfont.render("TIME: " + str((elapsed_time // 60) + 12) + "AM", True, "White")
         screen.fill((0, 0, 0))
         screen.blit(rdoor, (0, drpos))
         screen.blit(ldoor, (0, dlpos))
         screen.blit(office, (0, 0))
+        screen.blit(powerdisplay,(0,1000))
+        screen.blit(TimeDisplay, (0,0))
         if keys[pygame.K_q] and cooldown("ldoor", 0.5):
             door("l")
         if keys[pygame.K_e] and cooldown("rdoor", 0.5):
@@ -339,6 +349,15 @@ def game(screen):
             screen.blit(dark, (0, 0))
         if flashlighton:
             screen.blit(flashlight, flashlightpos)
+            power -= 20
+        if dlclosed:
+            power -=10
+        if drclosed:
+            power -=10
+        if (elapsed_time // 60) == 6:
+            states.append(win)
+        if power <= 0:
+            states.append(lose)
     if incameras:
         screen.fill((0, 0, 0))
         numcam()
@@ -358,7 +377,7 @@ def game(screen):
             inback = False
     enemygroup.update()
 # Main loop
-States = [mainscreen]
+states = [mainscreen]
 
 while True:
     mousepos = pygame.mouse.get_pos()
@@ -374,7 +393,7 @@ while True:
     screen.fill((0, 0, 0))
     
     # Call the current state function
-    States[-1](screen)
+    states[-1](screen)
     
     # Update the display
     pygame.display.flip()
