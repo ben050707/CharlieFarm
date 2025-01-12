@@ -181,12 +181,26 @@ def mainscreen(screen):
             states.append(customscreen)
     if optionsbuttonrect.collidepoint(mousepos):
         screen.blit(optionsbuttonp, optionsbuttonrect)
+        if mousepress[0]:
+            states.append(options)
     if quitbuttonrect.collidepoint(mousepos):
         screen.blit(quitbuttonp, quitbuttonrect)
         if mousepress[0]:
             pygame.quit()
             exit()
 #==================================================================================================#
+
+# Options
+def options(screen):
+    vhs(screen)
+    screen.blit(backbutton, backbuttonrect)
+    if backbuttonrect.collidepoint(mousepos):
+        screen.blit(backbuttonp, backbuttonrect)
+        if mousepress[0]:
+            states.pop()
+
+#==================================================================================================#
+
 # Custom Enemies
 
 customenemygroup.add(CustomEnemy("Coby", 0, pygame.image.load("Data/States/Custom/Coby.png"), 530, 250))
@@ -305,24 +319,35 @@ def door(side):
         else:
             dlpos = 0
             dlclosed = True
+#Reset game variables function
+
+def reset():
+    global inoffice, incameras, inback, flashlighton, flashlightpos, incameras, inback, power, rawtime
+    inoffice = True
+    flashlighton = False
+    incameras = False
+    inback = False
+    flashlightpos = (-1000, -600)
+    incameras = False
+    inback = False
+    power = 20000
+    rawtime = int(time.time())
 
 # Game
 def game(screen):
     global inoffice, flashlighton, flashlightpos, incameras, inback, power, rawtime
     power -= 2
+    elapsed_time = (int(time.time()) - rawtime) * 2  # Double the elapsed time
+    if (elapsed_time // 60) >= 1:
+        TimeDisplay = powerfont.render("TIME: " + str(elapsed_time // 60) + "AM", True, "White")
+    else:
+        TimeDisplay = powerfont.render("TIME: " + str((elapsed_time // 60) + 12) + "AM", True, "White")
     if inoffice:
         powerdisplay = powerfont.render(str(power//200)+"%", True, "White")
-        elapsed_time = (int(time.time()) - rawtime) * 2  # Double the elapsed time
-        if (elapsed_time // 60) >= 1:
-            TimeDisplay = powerfont.render("TIME: " + str(elapsed_time // 60) + "AM", True, "White")
-        else:
-            TimeDisplay = powerfont.render("TIME: " + str((elapsed_time // 60) + 12) + "AM", True, "White")
         screen.fill((0, 0, 0))
         screen.blit(rdoor, (0, drpos))
         screen.blit(ldoor, (0, dlpos))
         screen.blit(office, (0, 0))
-        screen.blit(powerdisplay,(0,1000))
-        screen.blit(TimeDisplay, (0,0))
         if keys[pygame.K_q] and cooldown("ldoor", 0.5):
             door("l")
         if keys[pygame.K_e] and cooldown("rdoor", 0.5):
@@ -354,10 +379,12 @@ def game(screen):
             power -=10
         if drclosed:
             power -=10
-        if (elapsed_time // 60) == 6:
-            states.append(win)
-        if power <= 0:
-            states.append(lose)
+        screen.blit(powerdisplay,(0,1000))
+        screen.blit(TimeDisplay, (0,0))
+    if (elapsed_time // 60) == 6:
+        states.append(win)
+    if power <= 0:
+        states.append(lose)
     if incameras:
         screen.fill((0, 0, 0))
         numcam()
@@ -376,6 +403,30 @@ def game(screen):
             inoffice = True
             inback = False
     enemygroup.update()
+
+# Win Screen
+def win(screen):
+    screen.fill((0, 0, 0))
+    vhs(screen)
+    win = powerfont.render("You Win (Press space to return to menu", True, "White")
+    screen.blit(win, center)
+    if keys[pygame.K_SPACE]:
+        states.pop()
+        states.pop()
+        states.pop()
+        reset()
+
+# Lose Screen
+def lose(screen):
+    screen.fill((0, 0, 0))
+    vhs(screen)
+    lose = powerfont.render("You Lose (Press space to return to menu)", True, "White")
+    screen.blit(lose, center)
+    if keys[pygame.K_SPACE]:
+        states.pop()
+        states.pop()
+        states.pop()
+        reset()
 # Main loop
 states = [mainscreen]
 
