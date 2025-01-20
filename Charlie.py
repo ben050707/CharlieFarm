@@ -10,9 +10,13 @@ powerfont = pygame.font.Font(None, 50)
 center = (600, 450)
 transparent = (0, 0, 0, 0)
 rawtime = int(time.time())
-#ADD POWER AND TIME DISPLAY
-#AND WIN/LOSE SCREENS
-
+#==================================================================================================#
+#TO ADD:
+#KILL FUNCTION FOR COBY
+#JUMPSCARE FUNCTION FOR COBY
+#FIX CHARACTER INCONSISTENT APPERANCE IN OFFICE
+#ADD CHARACTER POSITION TO RESET FUNCTION
+#RESPAWN FOR COBY
 
 #i made a dictionary for cooldown function
 cooldowns = {}
@@ -106,12 +110,19 @@ class Enemy(pygame.sprite.Sprite):
         self.diffculty = diffculty
         self.pos = 3
         self.image = None
+        self.ticktime = 0
+
 
     def iskilled(self):
         pass
 
     def killplayer(self):
         pass
+
+    def tick(self):
+        if cooldown(self.name, self.ticktime):
+            if self.diffculty >= random.randint(0, 10):
+                self.move()
 
     def move(self):
         pass
@@ -120,9 +131,12 @@ class Enemy(pygame.sprite.Sprite):
         global camerapos, incameras
         if camerapos == self.pos and incameras:
             screen.blit(self.image, (400, 400))
+        if self.pos == 0 and not incameras:
+            screen.blit(self.image, (400, 400))
 
     def update(self):
         self.display()
+        self.tick()
 
 
 
@@ -150,7 +164,9 @@ class CustomEnemy(pygame.sprite.Sprite):
         if self.rectright.collidepoint(mousepos):
             if mousepress[0] and self.difficulty < 10 and cooldown("arrow_right", 0.5):
                 self.difficulty += 1
-    
+    def returndifficulty(self):
+        return self.difficulty
+
     def reset(self):
         self.difficulty = 0
 
@@ -202,8 +218,8 @@ def options(screen):
 #==================================================================================================#
 
 # Custom Enemies
-
-customenemygroup.add(CustomEnemy("Coby", 0, pygame.image.load("Data/States/Custom/Coby.png"), 530, 250))
+cobybutton = CustomEnemy("Coby", 0, pygame.image.load("Data/States/Custom/Coby.png"), 530, 250)
+customenemygroup.add(cobybutton)
 customenemygroup.add(CustomEnemy("Chavo", 0, pygame.image.load("Data/States/Custom/Chavo.png"), 770, 250))
 customenemygroup.add(CustomEnemy("Frederick", 0, pygame.image.load("Data/States/Custom/Frederick.png"), 1010, 250))
 customenemygroup.add(CustomEnemy("Cody", 0, pygame.image.load("Data/States/Custom/Cody.png"), 530, 510))
@@ -214,19 +230,27 @@ customenemygroup.add(CustomEnemy("Cedrick", 0, pygame.image.load("Data/States/Cu
 #Real Enemies
 
 class Coby(Enemy):
-    def __init__(self, name, diffculty, pathing, jumpscare, posarray):
+    def __init__(self, name, diffculty):
         super().__init__(name, diffculty)
         self.rest = pygame.image.load("Data/Characters/Coby/CobyRest.png")
         self.hall = pygame.image.load("Data/Characters/Coby/CobyHall.png")
         self.wall = pygame.image.load("Data/Characters/Coby/CobyWall.png")
-        self.office = pygame.image.load("Data/Characters/Coby/CobyIn.png")
+        self.office = imgimport("Data/Characters/Coby/CobyIn.png", (200, 200))
         self.jumpscare = imgimport("Data/Characters/Coby/CobyJumpscare.png", (1920, 1080))
         self.image = self.rest
+        self.pathing = [3, 2 , 1, 0]
+        self.imagearray = [self.rest, self.hall, self.wall, self.office]
+        self.ticktime = 1
 
-    def movement(self):
-        pass
+    def move(self):
+        if self.pos != 0:
+            currentpos = self.pathing.index(self.pos) + 1
+            self.pos = self.pathing[currentpos]
+            self.image = self.imagearray[currentpos]
+            print(str(self.image))
+        elif dlclosed:
+            self.killplayer()
 
-enemygroup.add(Coby("Coby", 0, 0, 0, 0))
 #==================================================================================================#
 # Customscreen
 def customscreen(screen):
@@ -243,6 +267,7 @@ def customscreen(screen):
     if beginbuttonrect.collidepoint(mousepos):
         screen.blit(beginbuttonp, beginbuttonrect)
         if mousepress[0]:
+            enemygroup.add(Coby("Coby", cobybutton.returndifficulty()))
             states.append(game)
 
 # Game Map
