@@ -436,6 +436,7 @@ def game(screen):
     if inback:
         screen.fill((0, 0, 0))
         screen.blit(back, (0, 0))
+        enemygroup.update()
         screen.blit(dark, (0, 0))
         if keys[pygame.K_x] and cooldown("back", 0.2):
             inoffice = True
