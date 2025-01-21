@@ -120,6 +120,8 @@ class Enemy(pygame.sprite.Sprite):
         pass
 
     def tick(self):
+        if self.pos == 0:
+            self.flashlight_sight()
         if cooldown(self.name, self.ticktime):
             if self.diffculty >= random.randint(0, 10):
                 self.move()
@@ -132,7 +134,15 @@ class Enemy(pygame.sprite.Sprite):
         if camerapos == self.pos and incameras:
             screen.blit(self.image, (400, 400))
         if self.pos == 0 and not incameras:
-            screen.blit(self.image, (400, 400))
+            screen.blit(self.image, (40, 550))
+    
+    def flashlight_sight(self):
+        global flashlightpos, flashlighton
+        if flashlightpos == self.flashlight and flashlighton:
+            self.image.set_alpha(255)
+        else:
+            self.image.set_alpha(70)
+        
 
     def update(self):
         self.display()
@@ -241,6 +251,7 @@ class Coby(Enemy):
         self.pathing = [3, 2 , 1, 0]
         self.imagearray = [self.rest, self.hall, self.wall, self.office]
         self.ticktime = 1
+        self.flashlight = (-1700, -500)
 
     def move(self):
         if self.pos != 0:
@@ -373,6 +384,7 @@ def game(screen):
         screen.blit(rdoor, (0, drpos))
         screen.blit(ldoor, (0, dlpos))
         screen.blit(office, (0, 0))
+        enemygroup.update()
         if keys[pygame.K_q] and cooldown("ldoor", 0.5):
             door("l")
         if keys[pygame.K_e] and cooldown("rdoor", 0.5):
@@ -414,6 +426,7 @@ def game(screen):
         screen.fill((0, 0, 0))
         numcam()
         screen.blit(cameraposarray[camerapos], (0, 0))
+        enemygroup.update()
         if camerapos != 6:
             rain(screen)
         screen.blit(dark, (0, 0))
@@ -427,7 +440,7 @@ def game(screen):
         if keys[pygame.K_x] and cooldown("back", 0.2):
             inoffice = True
             inback = False
-    enemygroup.update()
+    
 
 # Win Screen
 def win(screen):
