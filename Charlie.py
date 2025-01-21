@@ -12,11 +12,7 @@ transparent = (0, 0, 0, 0)
 rawtime = int(time.time())
 #==================================================================================================#
 #TO ADD:
-#KILL FUNCTION FOR COBY
-#JUMPSCARE FUNCTION FOR COBY
-#FIX CHARACTER INCONSISTENT APPERANCE IN OFFICE
-#ADD CHARACTER POSITION TO RESET FUNCTION
-#RESPAWN FOR COBY
+#the character coby jumspacres if it enters thee office regardless of whether or not the door gets shut on him last secondd
 
 #i made a dictionary for cooldown function
 cooldowns = {}
@@ -111,13 +107,23 @@ class Enemy(pygame.sprite.Sprite):
         self.pos = 3
         self.image = None
         self.ticktime = 0
-
+        self.jumpscare = None
+        self.inside = False
+        self.inside_time = 0  # Add this line
 
     def iskilled(self):
         pass
 
     def killplayer(self):
-        pass
+        global inplay, jumpscaretimer
+        if inplay:
+            jumpscaretimer = 0
+        if self.inside and (time.time() - self.inside_time) >= 1:  # Add this condition
+            inplay = False
+            screen.blit(self.jumpscare, (0, 0))
+            jumpscaretimer += 1
+            if jumpscaretimer >= 60:
+                states.append(lose)
 
     def tick(self):
         if self.pos == 0:
@@ -127,7 +133,16 @@ class Enemy(pygame.sprite.Sprite):
                 self.move()
 
     def move(self):
-        pass
+        global inplay
+        if inplay:
+            if self.pos != 0:
+                currentpos = self.pathing.index(self.pos) + 1
+                self.pos = self.pathing[currentpos]
+                self.image = self.imagearray[currentpos]
+                print(str(self.image))
+            elif self.pos == 0:
+                self.inside = True
+                self.inside_time = time.time()  # Add this line
 
     def display(self):
         global camerapos, incameras
@@ -141,12 +156,13 @@ class Enemy(pygame.sprite.Sprite):
         if flashlightpos == self.flashlight and flashlighton:
             self.image.set_alpha(255)
         else:
-            self.image.set_alpha(70)
+            self.image.set_alpha(0)
         
 
     def update(self):
         self.display()
         self.tick()
+        self.killplayer()
 
 
 
@@ -254,12 +270,16 @@ class Coby(Enemy):
         self.flashlight = (-1700, -500)
 
     def move(self):
-        if self.pos != 0:
-            currentpos = self.pathing.index(self.pos) + 1
-            self.pos = self.pathing[currentpos]
-            self.image = self.imagearray[currentpos]
-            print(str(self.image))
-        elif dlclosed:
+        global inplay
+        super().move()
+        if self.pos == 0:
+            if dlclosed:
+                self.pos = 3
+                self.image = self.rest
+            else:
+                self.inside = True
+                self.inside_time = time.time()  # Add this line
+        if self.inside:
             self.killplayer()
 
 #==================================================================================================#
@@ -278,6 +298,7 @@ def customscreen(screen):
     if beginbuttonrect.collidepoint(mousepos):
         screen.blit(beginbuttonp, beginbuttonrect)
         if mousepress[0]:
+            reset()
             enemygroup.add(Coby("Coby", cobybutton.returndifficulty()))
             states.append(game)
 
@@ -311,6 +332,8 @@ camerapos = 1
 cameraposarray = [0, lwall, lhall, coop, rhall, rwall, fhall, uhall, uwall]
 inback = False
 power = 20000
+inplay = False
+jumpscaretimer = 0
 
 # Camera function
 def numcam():
@@ -358,7 +381,7 @@ def door(side):
 #Reset game variables function
 
 def reset():
-    global inoffice, incameras, inback, flashlighton, flashlightpos, incameras, inback, power, rawtime
+    global inoffice, incameras, inback, flashlighton, flashlightpos, incameras, inback, power, rawtime, inplay
     inoffice = True
     flashlighton = False
     incameras = False
@@ -368,6 +391,8 @@ def reset():
     inback = False
     power = 20000
     rawtime = int(time.time())
+    inplay = True
+    enemygroup.empty()
 
 # Game
 def game(screen):
@@ -453,7 +478,6 @@ def win(screen):
         states.pop()
         states.pop()
         states.pop()
-        reset()
 
 # Lose Screen
 def lose(screen):
@@ -465,7 +489,6 @@ def lose(screen):
         states.pop()
         states.pop()
         states.pop()
-        reset()
 # Main loop
 states = [mainscreen]
 
