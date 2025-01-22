@@ -139,7 +139,7 @@ class Enemy(pygame.sprite.Sprite):
                 currentpos = self.pathing.index(self.pos) + 1
                 self.pos = self.pathing[currentpos]
                 self.image = self.imagearray[currentpos]
-                print(str(self.image))
+                print(self.pos)
             elif self.pos == 0:
                 self.inside = True
                 self.inside_time = time.time()  # Add this line
@@ -149,7 +149,7 @@ class Enemy(pygame.sprite.Sprite):
         if camerapos == self.pos and incameras:
             screen.blit(self.image, (400, 400))
         if self.pos == 0 and not incameras:
-            screen.blit(self.image, (40, 550))
+            screen.blit(self.image, (10, 400))
     
     def flashlight_sight(self):
         global flashlightpos, flashlighton
@@ -271,16 +271,13 @@ class Coby(Enemy):
 
     def move(self):
         global inplay
-        super().move()
         if self.pos == 0:
             if dlclosed:
                 self.pos = 3
                 self.image = self.rest
-            else:
-                self.inside = True
-                self.inside_time = time.time()  # Add this line
-        if self.inside:
-            self.killplayer()
+        super().move()
+
+        
 
 #==================================================================================================#
 # Customscreen
@@ -406,10 +403,12 @@ def game(screen):
     if inoffice:
         powerdisplay = powerfont.render(str(power//200)+"%", True, "White")
         screen.fill((0, 0, 0))
-        screen.blit(rdoor, (0, drpos))
-        screen.blit(ldoor, (0, dlpos))
         screen.blit(office, (0, 0))
         enemygroup.update()
+        if drclosed:
+            screen.blit(rdoor, (0, drpos))
+        if dlclosed:
+            screen.blit(ldoor, (0, dlpos))
         if keys[pygame.K_q] and cooldown("ldoor", 0.5):
             door("l")
         if keys[pygame.K_e] and cooldown("rdoor", 0.5):
