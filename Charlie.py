@@ -275,7 +275,8 @@ class Coby(Enemy):
             if dlclosed:
                 self.pos = 3
                 self.image = self.rest
-        super().move()
+        else:
+            super().move()
 
         
 
