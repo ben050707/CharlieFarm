@@ -139,7 +139,6 @@ class Enemy(pygame.sprite.Sprite):
                 currentpos = self.pathing.index(self.pos) + 1
                 self.pos = self.pathing[currentpos]
                 self.image = self.imagearray[currentpos]
-                print(self.pos)
             elif self.pos == 0:
                 self.inside = True
                 self.inside_time = time.time()  # Add this line
