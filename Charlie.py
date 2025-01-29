@@ -247,7 +247,7 @@ cobybutton = CustomEnemy("Coby", 0, pygame.image.load("Data/States/Custom/Coby.p
 customenemygroup.add(cobybutton)
 customenemygroup.add(CustomEnemy("Chavo", 0, pygame.image.load("Data/States/Custom/Chavo.png"), 770, 250))
 customenemygroup.add(CustomEnemy("Frederick", 0, pygame.image.load("Data/States/Custom/Frederick.png"), 1010, 250))
-customenemygroup.add(CustomEnemy("Cody", 0, pygame.image.load("Data/States/Custom/Cody.png"), 530, 510))
+codybutton = customenemygroup.add(CustomEnemy("Cody", 0, pygame.image.load("Data/States/Custom/Cody.png"), 530, 510))
 customenemygroup.add(CustomEnemy("FredDerick", 0, pygame.image.load("Data/States/Custom/Fred_Derrick.png"), 770, 510))
 customenemygroup.add(CustomEnemy("Cedrick", 0, pygame.image.load("Data/States/Custom/Cedrick.png"), 1010, 510))
 
@@ -277,8 +277,28 @@ class Coby(Enemy):
         else:
             super().move()
 
-        
+class Cody(Enemy):
+    def __init__(self, name, difficulty):
+        super().__init__(name, difficulty)
+        self.rest = pygame.image.load("Data/Characters/Cody/CodyRest.png")
+        self.hall = pygame.image.load("Data/Characters/Cody/CodyHall.png")
+        self.wall = pygame.image.load("Data/Characters/Cody/CodyWall.png")
+        self.office = imgimport("Data/Characters/Cody/CodyIn.png", (200, 200))
+        self.jumpscare = imgimport("Data/Characters/Cody/CodyJumpscare.png", (1920, 1080))
+        self.image = self.rest
+        self.pathing = [3, 4 , 5, 0]
+        self.imagearray = [self.rest, self.hall, self.wall, self.office]
+        self.ticktime = 1
+        self.flashlight = (-1700, -500)
 
+    def move(self):
+        global inplay
+        if self.pos == 0:
+            if dlclosed:
+                self.pos = 3
+                self.image = self.rest
+        else:
+            super().move()
 #==================================================================================================#
 # Customscreen
 def customscreen(screen):
