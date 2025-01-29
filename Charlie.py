@@ -11,8 +11,15 @@ center = (600, 450)
 transparent = (0, 0, 0, 0)
 rawtime = int(time.time())
 #==================================================================================================#
+#LAST DONE:
+#balanced the power and tick for enemies
+#power and time displays no matter what gamestate you are in
+#cody and coby are now fully functional
+#reduce custom arrow cooldown
+
 #TO ADD:
-#the character coby jumspacres if it enters thee office regardless of whether or not the door gets shut on him last secondd
+#Cedrick the fat chicken
+#
 
 #i made a dictionary for cooldown function
 cooldowns = {}
@@ -111,7 +118,6 @@ class Enemy(pygame.sprite.Sprite):
         self.inside = False
         self.inside_time = 0  # Add this line
         self.cankill = False
-
     def iskilled(self):
         pass
 
@@ -132,9 +138,9 @@ class Enemy(pygame.sprite.Sprite):
                 self.move()
 
     def move(self):
-            currentpos = self.pathing.index(self.pos) + 1
-            self.pos = self.pathing[currentpos]
-            self.image = self.imagearray[currentpos]
+        currentpos = self.pathing.index(self.pos) + 1
+        self.pos = self.pathing[currentpos]
+        self.image = self.imagearray[currentpos]
 
 
     def display(self):
@@ -182,10 +188,10 @@ class CustomEnemy(pygame.sprite.Sprite):
         difficultydisplay = powerfont.render(str(self.difficulty), True, "White")
         screen.blit(difficultydisplay, (self.pfpx, self.pfpy + 125))
         if self.rectleft.collidepoint(mousepos):
-            if mousepress[0] and self.difficulty > 0 and cooldown("arrow_left", 0.5):
+            if mousepress[0] and self.difficulty > 0 and cooldown("arrow_left", 0.2):
                 self.difficulty -= 1
         if self.rectright.collidepoint(mousepos):
-            if mousepress[0] and self.difficulty < 10 and cooldown("arrow_right", 0.5):
+            if mousepress[0] and self.difficulty < 10 and cooldown("arrow_right", 0.2):
                 self.difficulty += 1
     def returndifficulty(self):
         return self.difficulty
@@ -304,10 +310,10 @@ class Cody(Enemy):
     def move(self):
         global inplay
         if self.pos == 0:
-            if dlclosed:
+            if drclosed:
                 self.pos = 3
                 self.image = self.rest
-            if not dlclosed:
+            if not drclosed:
                 self.cankill = True
         else:
             super().move()
@@ -426,7 +432,7 @@ def reset():
     flashlightpos = (-1000, -600)
     incameras = False
     inback = False
-    power = 20000
+    power = 40000
     rawtime = int(time.time())
     inplay = True
     enemygroup.empty()
@@ -435,13 +441,17 @@ def reset():
 def game(screen):
     global inoffice, flashlighton, flashlightpos, incameras, inback, power, rawtime
     power -= 2
+    powerdisplay = powerfont.render(str(power//200)+"%", True, "White")
     elapsed_time = (int(time.time()) - rawtime) * 2  # Double the elapsed time
     if (elapsed_time // 60) >= 1:
         TimeDisplay = powerfont.render("TIME: " + str(elapsed_time // 60) + "AM", True, "White")
     else:
         TimeDisplay = powerfont.render("TIME: " + str((elapsed_time // 60) + 12) + "AM", True, "White")
+    if dlclosed:
+        power -=10
+    if drclosed:
+        power -=10
     if inoffice:
-        powerdisplay = powerfont.render(str(power//200)+"%", True, "White")
         screen.fill((0, 0, 0))
         screen.blit(office, (0, 0))
         enemygroup.update()
@@ -475,13 +485,7 @@ def game(screen):
             screen.blit(dark, (0, 0))
         if flashlighton:
             screen.blit(flashlight, flashlightpos)
-            power -= 20
-        if dlclosed:
-            power -=10
-        if drclosed:
-            power -=10
-        screen.blit(powerdisplay,(0,1000))
-        screen.blit(TimeDisplay, (0,0))
+            power -= 5
     if (elapsed_time // 60) == 6:
         states.append(win)
     if power <= 0:
@@ -505,13 +509,15 @@ def game(screen):
         if keys[pygame.K_x] and cooldown("back", 0.2):
             inoffice = True
             inback = False
+    screen.blit(powerdisplay,(0,1000))
+    screen.blit(TimeDisplay, (0,0))
     
 
 # Win Screen
 def win(screen):
     screen.fill((0, 0, 0))
     vhs(screen)
-    win = powerfont.render("You Win (Press space to return to menu", True, "White")
+    win = powerfont.render("You Win (Press space to return to menu)", True, "White")
     screen.blit(win, center)
     if keys[pygame.K_SPACE]:
         states.pop()
