@@ -110,45 +110,42 @@ class Enemy(pygame.sprite.Sprite):
         self.jumpscare = None
         self.inside = False
         self.inside_time = 0  # Add this line
+        self.cankill = False
 
     def iskilled(self):
         pass
 
     def killplayer(self):
-        global inplay, jumpscaretimer
-        if inplay:
-            jumpscaretimer = 0
-        if self.inside and (time.time() - self.inside_time) >= 1:  # Add this condition
-            inplay = False
+        global jumpscaretimer
+        if self.cankill:
             screen.blit(self.jumpscare, (0, 0))
             jumpscaretimer += 1
             if jumpscaretimer >= 60:
                 states.append(lose)
 
     def tick(self):
+        global jumpscaretimer
         if self.pos == 0:
             self.flashlight_sight()
         if cooldown(self.name, self.ticktime):
-            if self.diffculty >= random.randint(0, 10):
+            if self.diffculty > random.randint(0, 10):
                 self.move()
 
     def move(self):
-        global inplay
-        if inplay:
-            if self.pos != 0:
-                currentpos = self.pathing.index(self.pos) + 1
-                self.pos = self.pathing[currentpos]
-                self.image = self.imagearray[currentpos]
-            elif self.pos == 0:
-                self.inside = True
-                self.inside_time = time.time()  # Add this line
+            currentpos = self.pathing.index(self.pos) + 1
+            self.pos = self.pathing[currentpos]
+            self.image = self.imagearray[currentpos]
+
 
     def display(self):
         global camerapos, incameras
         if camerapos == self.pos and incameras:
-            screen.blit(self.image, (400, 400))
+            screen.blit(self.image, self.screenpos)
         if self.pos == 0 and not incameras:
-            screen.blit(self.image, (10, 400))
+            screen.blit(self.image, self.screenpos)
+    
+    def positionswitch(self):
+        pass
     
     def flashlight_sight(self):
         global flashlightpos, flashlighton
@@ -161,6 +158,7 @@ class Enemy(pygame.sprite.Sprite):
     def update(self):
         self.display()
         self.tick()
+        self.positionswitch()
         self.killplayer()
 
 
@@ -245,9 +243,10 @@ def options(screen):
 # Custom Enemies
 cobybutton = CustomEnemy("Coby", 0, pygame.image.load("Data/States/Custom/Coby.png"), 530, 250)
 customenemygroup.add(cobybutton)
+codybutton = CustomEnemy("Cody", 0, pygame.image.load("Data/States/Custom/Cody.png"), 530, 510)
+customenemygroup.add(codybutton)
 customenemygroup.add(CustomEnemy("Chavo", 0, pygame.image.load("Data/States/Custom/Chavo.png"), 770, 250))
 customenemygroup.add(CustomEnemy("Frederick", 0, pygame.image.load("Data/States/Custom/Frederick.png"), 1010, 250))
-codybutton = customenemygroup.add(CustomEnemy("Cody", 0, pygame.image.load("Data/States/Custom/Cody.png"), 530, 510))
 customenemygroup.add(CustomEnemy("FredDerick", 0, pygame.image.load("Data/States/Custom/Fred_Derrick.png"), 770, 510))
 customenemygroup.add(CustomEnemy("Cedrick", 0, pygame.image.load("Data/States/Custom/Cedrick.png"), 1010, 510))
 
@@ -267,6 +266,7 @@ class Coby(Enemy):
         self.imagearray = [self.rest, self.hall, self.wall, self.office]
         self.ticktime = 1
         self.flashlight = (-1700, -500)
+        self.screenpos = (400, 400)
 
     def move(self):
         global inplay
@@ -274,8 +274,17 @@ class Coby(Enemy):
             if dlclosed:
                 self.pos = 3
                 self.image = self.rest
+            if not dlclosed:
+                self.cankill = True
         else:
             super().move()
+    
+    def positionswitch(self):
+        if self.pos != 0:
+            self.screenpos = (400, 400)
+        else:
+            self.screenpos = (10, 400)
+
 
 class Cody(Enemy):
     def __init__(self, name, difficulty):
@@ -289,7 +298,8 @@ class Cody(Enemy):
         self.pathing = [3, 4 , 5, 0]
         self.imagearray = [self.rest, self.hall, self.wall, self.office]
         self.ticktime = 1
-        self.flashlight = (-1700, -500)
+        self.flashlight = (-230, -500)
+        self.screenpositon = (800, 400)
 
     def move(self):
         global inplay
@@ -297,8 +307,16 @@ class Cody(Enemy):
             if dlclosed:
                 self.pos = 3
                 self.image = self.rest
+            if not dlclosed:
+                self.cankill = True
         else:
             super().move()
+
+    def positionswitch(self):
+        if self.pos != 0:
+            self.screenpos = (800, 400)
+        else:
+            self.screenpos = (1600, 400)
 #==================================================================================================#
 # Customscreen
 def customscreen(screen):
@@ -317,6 +335,7 @@ def customscreen(screen):
         if mousepress[0]:
             reset()
             enemygroup.add(Coby("Coby", cobybutton.returndifficulty()))
+            enemygroup.add(Cody("Cody", codybutton.returndifficulty()))
             states.append(game)
 
 # Game Map
@@ -398,7 +417,8 @@ def door(side):
 #Reset game variables function
 
 def reset():
-    global inoffice, incameras, inback, flashlighton, flashlightpos, incameras, inback, power, rawtime, inplay
+    global inoffice, incameras, inback, flashlighton, flashlightpos, incameras, inback, power, rawtime, inplay, jumpscaretimer
+    jumpscaretimer = 0
     inoffice = True
     flashlighton = False
     incameras = False
