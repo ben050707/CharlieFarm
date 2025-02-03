@@ -1,6 +1,7 @@
 import pygame
 import random
 import time
+import os
 
 pygame.init()
 screen = pygame.display.set_mode((1920, 1080))
@@ -12,13 +13,10 @@ transparent = (0, 0, 0, 0)
 rawtime = int(time.time())
 #==================================================================================================#
 #LAST DONE:
-#balanced the power and tick for enemies
-#power and time displays no matter what gamestate you are in
-#cody and coby are now fully functional
-#reduce custom arrow cooldown
+#cedrick the fat chicken
 
 #TO ADD:
-#Cedrick the fat chicken
+#another chicken probably the upstairs one andd also figure out why cedrick flashes when he enters the office
 #
 
 #i made a dictionary for cooldown function
@@ -124,10 +122,17 @@ class Enemy(pygame.sprite.Sprite):
     def killplayer(self):
         global jumpscaretimer
         if self.cankill:
-            screen.blit(self.jumpscare, (0, 0))
-            jumpscaretimer += 1
-            if jumpscaretimer >= 60:
-                states.append(lose)
+            if type(self.jumpscare) is list:
+                self.jumpscarelength = len(self.jumpscare) * 10
+                screen.blit(self.jumpscare[jumpscaretimer//10], (0, 0))
+                jumpscaretimer += 1
+                if jumpscaretimer >= self.jumpscarelength:
+                    states.append(lose)
+            else:
+                screen.blit(self.jumpscare, (0, 0))
+                jumpscaretimer += 1
+                if jumpscaretimer >= 60:
+                    states.append(lose)
 
     def tick(self):
         global jumpscaretimer
@@ -139,7 +144,7 @@ class Enemy(pygame.sprite.Sprite):
 
     def move(self):
         if self.pos != 0 and self.pos != 3:
-            if self.diffculty > random.randint(-10, 10):
+            if self.diffculty > random.randint(-20, 10):
                 currentpos = self.pathing.index(self.pos) + 1
                 self.pos = self.pathing[currentpos]
                 self.image = self.imagearray[currentpos]
@@ -267,6 +272,11 @@ customenemygroup.add(CustomEnemy("Chavo", 0, pygame.image.load("Data/States/Cust
 customenemygroup.add(CustomEnemy("Frederick", 0, pygame.image.load("Data/States/Custom/Frederick.png"), 1010, 250))
 customenemygroup.add(CustomEnemy("FredDerick", 0, pygame.image.load("Data/States/Custom/Fred_Derrick.png"), 770, 510))
 
+#==================================================================================================#
+#Jumpscare loader
+jumpscarelist = []
+for i in os.listdir("./Data/Characters/Cedrick/Jumpscare"):
+    jumpscarelist.append(pygame.transform.scale(pygame.image.load(f"./Data/Characters/Cedrick/Jumpscare/{i}").convert_alpha(),(1920, 1080)))
 
 
 #Real Enemies
@@ -342,7 +352,7 @@ class Cedrick(Enemy):
         self.rest = pygame.image.load("Data/Characters/Cedrick/CedrickRest.png")
         self.hall = pygame.image.load("Data/Characters/Cedrick/CedrickHall.png")
         self.office = imgimport("Data/Characters/Cedrick/CedrickIn.png", (200, 200))
-        self.jumpscare = imgimport("Data/Characters/Cedrick/CedrickJumpscare.png", (1920, 1080))
+        self.jumpscare = jumpscarelist
         self.image = self.rest
         self.pathing = [3, 6, 0]
         self.imagearray = [self.rest, self.hall, self.office]
@@ -351,7 +361,7 @@ class Cedrick(Enemy):
         self.screenpositon = (200, 400)
         self.activated = False
         self.flashlight_time = 0
-
+        self.flashed = False
     def move(self):
         global inplay
         if self.pos == 6:
@@ -361,15 +371,16 @@ class Cedrick(Enemy):
             if not self.activated:
                 self.pos = 3
                 self.image = self.rest
-            if self.activated:
+            if self.activated and not self.flashed:
                 self.cankill = True
         else:
             super().move()
     def flashlight_sight(self):
         if flashlightpos == self.flashlight and flashlighton:
             self.flashlight_time += 1
-            self.cankill = False
-        print(self.cankill)
+            self.flashed = True
+        else:
+            self.flashed = False
         if self.flashlight_time >= 200:
             self.activated = False
             self.flashlight_time = 0
@@ -379,7 +390,7 @@ class Cedrick(Enemy):
             self.screenpos = (800, 400)
         else:
             self.screenpos = (1000, 400)
- 
+    
 #==================================================================================================#
 # Customscreen
 def customscreen(screen):
