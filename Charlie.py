@@ -138,9 +138,19 @@ class Enemy(pygame.sprite.Sprite):
                 self.move()
 
     def move(self):
-        currentpos = self.pathing.index(self.pos) + 1
-        self.pos = self.pathing[currentpos]
-        self.image = self.imagearray[currentpos]
+        if self.pos != 0 and self.pos != 3:
+            if self.diffculty > random.randint(-10, 10):
+                currentpos = self.pathing.index(self.pos) + 1
+                self.pos = self.pathing[currentpos]
+                self.image = self.imagearray[currentpos]
+            else:
+                currentpos = self.pathing.index(self.pos) - 1
+                self.pos = self.pathing[currentpos]
+                self.image = self.imagearray[currentpos]
+        else:
+                currentpos = self.pathing.index(self.pos) + 1
+                self.pos = self.pathing[currentpos]
+                self.image = self.imagearray[currentpos]
 
 
     def display(self):
@@ -251,10 +261,12 @@ cobybutton = CustomEnemy("Coby", 0, pygame.image.load("Data/States/Custom/Coby.p
 customenemygroup.add(cobybutton)
 codybutton = CustomEnemy("Cody", 0, pygame.image.load("Data/States/Custom/Cody.png"), 530, 510)
 customenemygroup.add(codybutton)
+cedrickbutton = CustomEnemy("Cedrick", 0, pygame.image.load("Data/States/Custom/Cedrick.png"), 1010, 510)
+customenemygroup.add(cedrickbutton)
 customenemygroup.add(CustomEnemy("Chavo", 0, pygame.image.load("Data/States/Custom/Chavo.png"), 770, 250))
 customenemygroup.add(CustomEnemy("Frederick", 0, pygame.image.load("Data/States/Custom/Frederick.png"), 1010, 250))
 customenemygroup.add(CustomEnemy("FredDerick", 0, pygame.image.load("Data/States/Custom/Fred_Derrick.png"), 770, 510))
-customenemygroup.add(CustomEnemy("Cedrick", 0, pygame.image.load("Data/States/Custom/Cedrick.png"), 1010, 510))
+
 
 
 #Real Enemies
@@ -323,6 +335,51 @@ class Cody(Enemy):
             self.screenpos = (800, 400)
         else:
             self.screenpos = (1600, 400)
+
+class Cedrick(Enemy):
+    def __init__(self, name, difficulty):
+        super().__init__(name, difficulty)
+        self.rest = pygame.image.load("Data/Characters/Cedrick/CedrickRest.png")
+        self.hall = pygame.image.load("Data/Characters/Cedrick/CedrickHall.png")
+        self.office = imgimport("Data/Characters/Cedrick/CedrickIn.png", (200, 200))
+        self.jumpscare = imgimport("Data/Characters/Cedrick/CedrickJumpscare.png", (1920, 1080))
+        self.image = self.rest
+        self.pathing = [3, 6, 0]
+        self.imagearray = [self.rest, self.hall, self.office]
+        self.ticktime = 1
+        self.flashlight = (-1000, -600)
+        self.screenpositon = (200, 400)
+        self.activated = False
+        self.flashlight_time = 0
+
+    def move(self):
+        global inplay
+        if self.pos == 6:
+            self.activated = True
+            super().move()
+        elif self.pos == 0:
+            if not self.activated:
+                self.pos = 3
+                self.image = self.rest
+            if self.activated:
+                self.cankill = True
+        else:
+            super().move()
+    def flashlight_sight(self):
+        if flashlightpos == self.flashlight and flashlighton:
+            self.flashlight_time += 1
+            self.cankill = False
+        print(self.cankill)
+        if self.flashlight_time >= 200:
+            self.activated = False
+            self.flashlight_time = 0
+        super().flashlight_sight()
+    def positionswitch(self):
+        if self.pos != 0:
+            self.screenpos = (800, 400)
+        else:
+            self.screenpos = (1000, 400)
+ 
 #==================================================================================================#
 # Customscreen
 def customscreen(screen):
@@ -342,6 +399,7 @@ def customscreen(screen):
             reset()
             enemygroup.add(Coby("Coby", cobybutton.returndifficulty()))
             enemygroup.add(Cody("Cody", codybutton.returndifficulty()))
+            enemygroup.add(Cedrick("Cedrick", cedrickbutton.returndifficulty()))
             states.append(game)
 
 # Game Map
