@@ -11,6 +11,7 @@ powerfont = pygame.font.Font(None, 50)
 center = (600, 450)
 transparent = (0, 0, 0, 0)
 rawtime = int(time.time())
+dying = False
 #==================================================================================================#
 #LAST DONE:
 #cedrick the fat chicken
@@ -120,18 +121,26 @@ class Enemy(pygame.sprite.Sprite):
         pass
 
     def killplayer(self):
-        global jumpscaretimer
+        global jumpscaretimer, dying,inback,incameras,inoffice
+        
         if self.cankill:
+            inoffice = True
+            incameras = False
+            inback = False
             if type(self.jumpscare) is list:
+                dying = True
                 self.jumpscarelength = len(self.jumpscare) * 10
                 screen.blit(self.jumpscare[jumpscaretimer//10], (0, 0))
                 jumpscaretimer += 1
                 if jumpscaretimer >= self.jumpscarelength:
+                    dying = False
                     states.append(lose)
             else:
+                dying = True
                 screen.blit(self.jumpscare, (0, 0))
                 jumpscaretimer += 1
                 if jumpscaretimer >= 60:
+                    dying = False
                     states.append(lose)
 
     def tick(self):
@@ -163,6 +172,7 @@ class Enemy(pygame.sprite.Sprite):
         if camerapos == self.pos and incameras:
             screen.blit(self.image, self.screenpos)
         if self.pos == 0 and not incameras:
+            self.flashlight_sight()
             screen.blit(self.image, self.screenpos)
     
     def positionswitch(self):
@@ -550,9 +560,9 @@ def game(screen):
         if keys[pygame.K_x] and cooldown("back", 0.2):
             inback = True
             inoffice = False
-        if not flashlighton:
+        if not flashlighton and not dying:
             screen.blit(dark, (0, 0))
-        if flashlighton:
+        if flashlighton and not dying:
             screen.blit(flashlight, flashlightpos)
             power -= 5
     if (elapsed_time // 60) == 6:
@@ -578,8 +588,9 @@ def game(screen):
         if keys[pygame.K_x] and cooldown("back", 0.2):
             inoffice = True
             inback = False
-    screen.blit(powerdisplay,(0,1000))
-    screen.blit(TimeDisplay, (0,0))
+    if not dying:
+        screen.blit(powerdisplay,(0,1000))
+        screen.blit(TimeDisplay, (0,0))
     
 
 # Win Screen
