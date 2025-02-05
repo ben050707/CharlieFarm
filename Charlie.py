@@ -17,7 +17,7 @@ dying = False
 #cedrick the fat chicken
 
 #TO ADD:
-#another chicken probably the upstairs one andd also figure out why cedrick flashes when he enters the office
+#chavo fredy
 #
 
 #i made a dictionary for cooldown function
@@ -152,7 +152,7 @@ class Enemy(pygame.sprite.Sprite):
                 self.move()
 
     def move(self):
-        if self.pos != 0 and self.pos != 3:
+        if self.pos != self.pathing[0] and self.pos != self.pathing[len(self.pathing)-1]:
             if self.diffculty > random.randint(-20, 10):
                 currentpos = self.pathing.index(self.pos) + 1
                 self.pos = self.pathing[currentpos]
@@ -278,15 +278,18 @@ codybutton = CustomEnemy("Cody", 0, pygame.image.load("Data/States/Custom/Cody.p
 customenemygroup.add(codybutton)
 cedrickbutton = CustomEnemy("Cedrick", 0, pygame.image.load("Data/States/Custom/Cedrick.png"), 1010, 510)
 customenemygroup.add(cedrickbutton)
-customenemygroup.add(CustomEnemy("Chavo", 0, pygame.image.load("Data/States/Custom/Chavo.png"), 770, 250))
+chavobutton = CustomEnemy("Chavo", 0, pygame.image.load("Data/States/Custom/Chavo.png"), 770, 250)
+customenemygroup.add(chavobutton)
 customenemygroup.add(CustomEnemy("Frederick", 0, pygame.image.load("Data/States/Custom/Frederick.png"), 1010, 250))
 customenemygroup.add(CustomEnemy("FredDerick", 0, pygame.image.load("Data/States/Custom/Fred_Derrick.png"), 770, 510))
 
 #==================================================================================================#
 #Jumpscare loader
-jumpscarelist = []
-for i in os.listdir("./Data/Characters/Cedrick/Jumpscare"):
-    jumpscarelist.append(pygame.transform.scale(pygame.image.load(f"./Data/Characters/Cedrick/Jumpscare/{i}").convert_alpha(),(1920, 1080)))
+def jumpscareload(Name):
+    jumpscarelist = []
+    for i in os.listdir(f"./Data/Characters/{Name}/Jumpscare"):
+        jumpscarelist.append(pygame.transform.scale(pygame.image.load(f"./Data/Characters/{Name}/Jumpscare/{i}").convert_alpha(),(1920, 1080)))
+    return jumpscarelist
 
 
 #Real Enemies
@@ -362,7 +365,7 @@ class Cedrick(Enemy):
         self.rest = pygame.image.load("Data/Characters/Cedrick/CedrickRest.png")
         self.hall = pygame.image.load("Data/Characters/Cedrick/CedrickHall.png")
         self.office = imgimport("Data/Characters/Cedrick/CedrickIn.png", (200, 200))
-        self.jumpscare = jumpscarelist
+        self.jumpscare = jumpscareload("Cedrick")
         self.image = self.rest
         self.pathing = [3, 6, 0]
         self.imagearray = [self.rest, self.hall, self.office]
@@ -400,7 +403,38 @@ class Cedrick(Enemy):
             self.screenpos = (800, 400)
         else:
             self.screenpos = (1000, 400)
+
+class Chavo(Enemy):
+    def __init__(self, name, diffculty):
+        super().__init__(name, diffculty)
+        self.rest = pygame.image.load("Data/Characters/Chavo/ChavoRest.png")
+        self.hall = pygame.image.load("Data/Characters/Chavo/ChavoHall.png")
+        self.wall = pygame.image.load("Data/Characters/Chavo/ChavoWall.png")
+        self.right = pygame.image.load("Data/Characters/Chavo/ChavoRight.png")
+        self.jumpscare = jumpscareload("Chavo")
+        self.image = self.rest
+        self.pathing = [3, 8, 7, 4]
+        self.imagearray = [self.rest, self.hall, self.wall, self.right]
+        self.ticktime = 1
+        self.flashlight = (-1700, -500)
+        self.screenpos = (400, 400)
+
+    def move(self):
+        global inplay, incameras
+        if self.pos == 4:
+            if drclosed:
+                self.pos = 3
+                self.image = self.rest
+            if not drclosed:
+                self.cankill = True
+        elif not incameras:
+            super().move()
     
+    def positionswitch(self):
+        if self.pos != 4:
+            self.screenpos = (400, 400)
+        else:
+            self.screenpos = (10, 400)
 #==================================================================================================#
 # Customscreen
 def customscreen(screen):
@@ -421,6 +455,7 @@ def customscreen(screen):
             enemygroup.add(Coby("Coby", cobybutton.returndifficulty()))
             enemygroup.add(Cody("Cody", codybutton.returndifficulty()))
             enemygroup.add(Cedrick("Cedrick", cedrickbutton.returndifficulty()))
+            enemygroup.add(Chavo("Chavo", chavobutton.returndifficulty()))
             states.append(game)
 
 # Game Map
