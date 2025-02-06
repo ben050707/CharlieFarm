@@ -14,11 +14,11 @@ rawtime = int(time.time())
 dying = False
 #==================================================================================================#
 #LAST DONE:
-#cedrick the fat chicken
+#chavo like freddy fnaf 1
 
 #TO ADD:
-#chavo fredy
-#
+#too many enemies come into the office at once
+#fred derick chicken
 
 #i made a dictionary for cooldown function
 cooldowns = {}
@@ -305,7 +305,7 @@ class Coby(Enemy):
         self.image = self.rest
         self.pathing = [3, 2 , 1, 0]
         self.imagearray = [self.rest, self.hall, self.wall, self.office]
-        self.ticktime = 1
+        self.ticktime = 2
         self.flashlight = (-1700, -500)
         self.screenpos = (400, 400)
 
@@ -338,7 +338,7 @@ class Cody(Enemy):
         self.image = self.rest
         self.pathing = [3, 4 , 5, 0]
         self.imagearray = [self.rest, self.hall, self.wall, self.office]
-        self.ticktime = 1
+        self.ticktime = 2
         self.flashlight = (-230, -500)
         self.screenpositon = (800, 400)
 
@@ -369,7 +369,7 @@ class Cedrick(Enemy):
         self.image = self.rest
         self.pathing = [3, 6, 0]
         self.imagearray = [self.rest, self.hall, self.office]
-        self.ticktime = 1
+        self.ticktime = 2
         self.flashlight = (-1000, -600)
         self.screenpositon = (200, 400)
         self.activated = False
@@ -413,20 +413,21 @@ class Chavo(Enemy):
         self.right = pygame.image.load("Data/Characters/Chavo/ChavoRight.png")
         self.jumpscare = jumpscareload("Chavo")
         self.image = self.rest
-        self.pathing = [3, 8, 7, 4]
+        self.pathing = [3, 7, 8, 4]
         self.imagearray = [self.rest, self.hall, self.wall, self.right]
-        self.ticktime = 1
+        self.ticktime = 3
         self.flashlight = (-1700, -500)
         self.screenpos = (400, 400)
 
     def move(self):
         global inplay, incameras
         if self.pos == 4:
-            if drclosed:
-                self.pos = 3
-                self.image = self.rest
-            if not drclosed:
-                self.cankill = True
+            if not incameras:
+                if drclosed:
+                    self.pos = 3
+                    self.image = self.rest
+                if not drclosed:
+                    self.cankill = True
         elif not incameras:
             super().move()
     
@@ -435,6 +436,9 @@ class Chavo(Enemy):
             self.screenpos = (400, 400)
         else:
             self.screenpos = (10, 400)
+
+class FredDerick(Enemy):
+
 #==================================================================================================#
 # Customscreen
 def customscreen(screen):
