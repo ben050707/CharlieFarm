@@ -231,7 +231,6 @@ class CustomEnemy(pygame.sprite.Sprite):
 #Groups
 customenemygroup = pygame.sprite.Group()
 enemygroup = pygame.sprite.Group()
-chain_game = pygame.sprite.Group()
 #==================================================================================================#
 
 # Mainscreen
@@ -438,67 +437,6 @@ class Chavo(Enemy):
         else:
             self.screenpos = (10, 400)
 
-class FredDerick(Enemy):
-    def __init__(self, name, diffculty):
-        super().__init__(name, diffculty)
-        self.rest = pygame.image.load("Data/Characters/FredDerick/FredDerickRest.png")
-        self.hall = pygame.image.load("Data/Characters/FredDerick/FredDerickHall.png")
-        self.wall = pygame.image.load("Data/Characters/FredDerick/FredDerickWall.png")
-        self.jumpscare = jumpscareload("FredDerick")
-        self.imagearray = [self.rest, self.hall, self.wall]
-        self.ticktime = 0.01
-        self.screenpos = (1000, 400)
-        self.meter = 1000
-
-class ChainGame:
-    def __init__(self, screen):
-        self.screen = screen
-        self.dragging = False
-        self.current_line = None
-        self.connections = []
-        self.pairs = []  # Initialize pairs as needed
-        self.colors = []  # Initialize colors as needed
-        print("Chaingame")
-
-    def handle_event(self, event):
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            self.dragging = True
-            self.current_line = {'start': event.pos, 'color': self.colors[0]}  # Example initialization
-        elif event.type == pygame.MOUSEBUTTONUP and self.dragging:
-            for idx, (_, right) in enumerate(self.pairs):
-                if pygame.Rect(right[0]-20, right[1]-20, 40, 40).collidepoint(event.pos):
-                    if self.current_line and self.colors[idx % len(self.colors)] == self.current_line['color']:
-                        self.connections.append((self.current_line['start'], right, self.current_line['color']))
-            self.dragging = False
-            self.current_line = None
-
-    def update(self):
-        self.screen.fill((30, 30, 30))
-        self.draw_nodes()
-        for start, end, color in self.connections:
-            pygame.draw.line(self.screen, color, start, end, 5)
-
-        if self.dragging and self.current_line:
-            mouse_pos = pygame.mouse.get_pos()
-            pygame.draw.line(self.screen, self.current_line['color'], self.current_line['start'], mouse_pos, 5)
-
-    def is_complete(self):
-        print(len(self.connections) == len(self.pairs))
-        return len(self.connections) == len(self.pairs)
-
-
-    def draw_nodes(self):
-        # Implement the method to draw nodes on the screen
-        pass
-
-
-# To integrate with your existing game loop:
-# chain_game = ChainGame(screen)
-# while not chain_game.is_complete():
-#     for event in pygame.event.get():
-#         chain_game.handle_event(event)
-#     chain_game.update()
-#     pygame.display.flip()
 
 #==================================================================================================#
 # Customscreen
@@ -618,7 +556,7 @@ def reset():
 
 # Game
 def game(screen):
-    global inoffice, flashlighton, flashlightpos, incameras, inback, power, rawtime, chain_game
+    global inoffice, flashlighton, flashlightpos, incameras, inback, power, rawtime
     power -= 2
     powerdisplay = powerfont.render(str(power//200)+"%", True, "White")
     elapsed_time = (int(time.time()) - rawtime) * 2  # Double the elapsed time
@@ -685,12 +623,6 @@ def game(screen):
         screen.blit(back, (0, 0))
         enemygroup.update()
         screen.blit(dark, (0, 0))
-        chain_game = ChainGame(screen)
-        while not chain_game.is_complete():
-            for event in pygame.event.get():
-                chain_game.handle_event(event)
-            chain_game.update()
-            pygame.display.flip()
         if keys[pygame.K_x] and cooldown("back", 0.2):
             inoffice = True
             inback = False
