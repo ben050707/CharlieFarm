@@ -280,7 +280,8 @@ cedrickbutton = CustomEnemy("Cedrick", 0, pygame.image.load("Data/States/Custom/
 customenemygroup.add(cedrickbutton)
 chavobutton = CustomEnemy("Chavo", 0, pygame.image.load("Data/States/Custom/Chavo.png"), 770, 250)
 customenemygroup.add(chavobutton)
-customenemygroup.add(CustomEnemy("Frederick", 0, pygame.image.load("Data/States/Custom/Frederick.png"), 1010, 250))
+fredderickbutton = (CustomEnemy("Frederick", 0, pygame.image.load("Data/States/Custom/Frederick.png"), 1010, 250))
+customenemygroup.add(fredderickbutton)
 customenemygroup.add(CustomEnemy("FredDerick", 0, pygame.image.load("Data/States/Custom/Fred_Derrick.png"), 770, 510))
 
 #==================================================================================================#
@@ -436,6 +437,29 @@ class Chavo(Enemy):
             self.screenpos = (400, 400)
         else:
             self.screenpos = (10, 400)
+
+class FredDerick(Enemy):
+    def __init__(self, name, diffculty):
+        super().__init__(name, diffculty)
+        self.rest = pygame.image.load("Data/Characters/FredDerick/FredDerickRest.png")
+        self.hall = pygame.image.load("Data/Characters/FredDerick/FredDerickHall.png")
+        self.wall = pygame.image.load("Data/Characters/FredDerick/FredDerickWall.png")
+        self.jumpscare = jumpscareload("FredDerick")
+        self.image = self.rest
+        self.imagearray = [self.rest, self.hall, self.wall]
+        self.chance = 3
+        self.ticktime = 20
+        self.flashlight = (-1700, -500)
+        self.screenpos = (400, 400)
+
+    def move(self):
+        if not minigame_complete:
+            if self.chance != 0:
+                self.chance -= 1
+            elif self.chance == 1:
+                self.cankill = True
+        else:
+            pass
 
 
 #==================================================================================================#
@@ -596,8 +620,9 @@ def game(screen):
             incameras = True
             inoffice = False
         if keys[pygame.K_x] and cooldown("back", 0.2):
-            inback = True
-            inoffice = False
+            for n in range(0, fredderickbutton.returndifficulty()):
+                inback = True
+                inoffice = False
         if not flashlighton and not dying:
             screen.blit(dark, (0, 0))
         if flashlighton and not dying:
@@ -626,6 +651,7 @@ def game(screen):
         if keys[pygame.K_x] and cooldown("back", 0.2):
             inoffice = True
             inback = False
+        minigame.update(screen)
     if not dying:
         screen.blit(powerdisplay,(0,1000))
         screen.blit(TimeDisplay, (0,0))
@@ -652,6 +678,35 @@ def lose(screen):
         states.pop()
         states.pop()
         states.pop()
+
+#==================================================================================================#
+#i made a skiddi grapah look at this graaaph
+class Minigametree():
+    def __init__(self):
+        self.left_rect = pygame.Rect(550, 400, 200, 200)
+        self.right_rect = pygame.Rect(1150, 400, 200, 200)
+        self.color = (255, 255, 255, 128)  # Translucent white
+        self.nodelist = []
+
+    def update(self, screen):
+        pygame.draw.rect(screen, self.color, self.left_rect)
+        pygame.draw.rect(screen, self.color, self.right_rect)
+
+minigame = Minigametree()
+
+class Node():
+    def __init__(self, left, right, color):
+        self.left = left
+        self.right = right
+        self.color = color
+        self.rect = self.obtainpos()
+    
+    def obtainpos(self):
+        if self.left:
+            return pygame.rect(random.randint(550, 750), random.randint(400, 600), 10, 10)
+        if self.right:
+            return pygame.rect(random.randint(1150, 1350), random.randint(400, 600), 10, 10)
+
 # Main loop
 states = [mainscreen]
 
