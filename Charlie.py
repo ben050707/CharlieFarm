@@ -41,7 +41,7 @@ def imgimport(img, size):
 # VHS effect
 VHS = []
 for i in range(6):
-    VHS.append(pygame.image.load(f"Data/States/Mainscreen/VHS/{i}.png"))
+    VHS.append(pygame.image.load(f"./Data/States/Mainscreen/VHS/{i}.png"))
 
 VHSINDEX = 0
 
@@ -106,10 +106,10 @@ beginbuttonrect = beginbutton.get_rect(center = (1500, 850))
 
 # Character Class
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, name, diffculty):
+    def __init__(self, name, difficulty):
         super().__init__()
         self.name = name
-        self.diffculty = diffculty
+        self.difficulty = difficulty
         self.pos = 3
         self.image = None
         self.ticktime = 0
@@ -148,12 +148,12 @@ class Enemy(pygame.sprite.Sprite):
         if self.pos == 0:
             self.flashlight_sight()
         if cooldown(self.name, self.ticktime):
-            if self.diffculty > random.randint(0, 10):
+            if self.difficulty > random.randint(0, 20):
                 self.move()
 
     def move(self):
         if self.pos != self.pathing[0] and self.pos != self.pathing[len(self.pathing)-1]:
-            if self.diffculty > random.randint(-20, 10):
+            if self.difficulty > random.randint(-20, 10):
                 currentpos = self.pathing.index(self.pos) + 1
                 self.pos = self.pathing[currentpos]
                 self.image = self.imagearray[currentpos]
@@ -169,7 +169,7 @@ class Enemy(pygame.sprite.Sprite):
 
     def display(self):
         global camerapos, incameras
-        if camerapos == self.pos and incameras:
+        if camerapos == self.pos and incameras and not hacked:
             screen.blit(self.image, self.screenpos)
         if self.pos == 0 and not incameras:
             self.flashlight_sight()
@@ -280,9 +280,11 @@ cedrickbutton = CustomEnemy("Cedrick", 0, pygame.image.load("Data/States/Custom/
 customenemygroup.add(cedrickbutton)
 chavobutton = CustomEnemy("Chavo", 0, pygame.image.load("Data/States/Custom/Chavo.png"), 770, 250)
 customenemygroup.add(chavobutton)
-fredderickbutton = (CustomEnemy("Frederick", 0, pygame.image.load("Data/States/Custom/Frederick.png"), 1010, 250))
+frederickbutton = (CustomEnemy("Frederick", 0, pygame.image.load("Data/States/Custom/Frederick.png"), 1010, 250))
+customenemygroup.add(frederickbutton)
+fredderickbutton = (CustomEnemy("FredDerick", 0, pygame.image.load("Data/States/Custom/Fred_Derrick.png"), 770, 510))
 customenemygroup.add(fredderickbutton)
-customenemygroup.add(CustomEnemy("FredDerick", 0, pygame.image.load("Data/States/Custom/Fred_Derrick.png"), 770, 510))
+
 
 #==================================================================================================#
 #Jumpscare loader
@@ -296,8 +298,8 @@ def jumpscareload(Name):
 #Real Enemies
 
 class Coby(Enemy):
-    def __init__(self, name, diffculty):
-        super().__init__(name, diffculty)
+    def __init__(self, name, difficulty):
+        super().__init__(name, difficulty)
         self.rest = pygame.image.load("Data/Characters/Coby/CobyRest.png")
         self.hall = pygame.image.load("Data/Characters/Coby/CobyHall.png")
         self.wall = pygame.image.load("Data/Characters/Coby/CobyWall.png")
@@ -406,8 +408,8 @@ class Cedrick(Enemy):
             self.screenpos = (1000, 400)
 
 class Chavo(Enemy):
-    def __init__(self, name, diffculty):
-        super().__init__(name, diffculty)
+    def __init__(self, name, difficulty):
+        super().__init__(name, difficulty)
         self.rest = pygame.image.load("Data/Characters/Chavo/ChavoRest.png")
         self.hall = pygame.image.load("Data/Characters/Chavo/ChavoHall.png")
         self.wall = pygame.image.load("Data/Characters/Chavo/ChavoWall.png")
@@ -438,9 +440,36 @@ class Chavo(Enemy):
         else:
             self.screenpos = (10, 400)
 
+class Frederick(Enemy):
+    def __init__(self, name, difficulty):
+        super().__init__(name, difficulty)
+        self.rest = pygame.image.load("Data/Characters/Frederick/FrederickRest.png")
+        self.hack = pygame.image.load("Data/Characters/Frederick/FrederickHack.png")
+        self.revealed = pygame.image.load("Data/Characters/Frederick/FrederickRevealed.png")
+        self.image = self.rest
+        self.imagearray = [self.rest, self.hack, self.revealed]
+        self.ticktime = 1
+        self.screenpos = (400, 400) 
+    
+    def move(self):
+        global cameraposarray,hacked
+        hacked = True
+        shuffledcameras = []
+        for i in range(0,8):
+            shuffledcameras.append(self.hack)
+        shuffledcameras[random.randint(0,7)] = self.revealed
+        cameraposarray[1:] = shuffledcameras
+        
+        
+    
+        
+
+            
+
+
 class FredDerick(Enemy):
-    def __init__(self, name, diffculty):
-        super().__init__(name, diffculty)
+    def __init__(self, name, difficulty):
+        super().__init__(name, difficulty)
         self.rest = pygame.image.load("Data/Characters/FredDerick/FredDerickRest.png")
         self.hall = pygame.image.load("Data/Characters/FredDerick/FredDerickHall.png")
         self.wall = pygame.image.load("Data/Characters/FredDerick/FredDerickWall.png")
@@ -453,15 +482,35 @@ class FredDerick(Enemy):
         self.screenpos = (400, 400)
 
     def move(self):
-        if not minigame_complete:
-            if self.chance != 0:
-                self.chance -= 1
-            elif self.chance == 1:
-                self.cankill = True
-        else:
-            pass
+        pass
 
+#==================================================================================================#
+#i made a skiddi grapah look at this graaaph
+class Minigametree():
+    def __init__(self):
+        self.left_rect = pygame.Rect(550, 400, 200, 200)
+        self.right_rect = pygame.Rect(1150, 400, 200, 200)
+        self.color = (255, 255, 255, 128)  # Translucent white
+        self.nodelist = []
 
+    def update(self, screen):
+        pygame.draw.rect(screen, self.color, self.left_rect)
+        pygame.draw.rect(screen, self.color, self.right_rect)
+
+minigame = Minigametree()
+
+class Node():
+    def __init__(self, left, right, color):
+        self.left = left
+        self.right = right
+        self.color = color
+        self.rect = self.obtainpos()
+    
+    def obtainpos(self):
+        if self.left:
+            return pygame.rect(random.randint(550, 750), random.randint(400, 600), 10, 10)
+        if self.right:
+            return pygame.rect(random.randint(1150, 1350), random.randint(400, 600), 10, 10)
 #==================================================================================================#
 # Customscreen
 def customscreen(screen):
@@ -483,6 +532,7 @@ def customscreen(screen):
             enemygroup.add(Cody("Cody", codybutton.returndifficulty()))
             enemygroup.add(Cedrick("Cedrick", cedrickbutton.returndifficulty()))
             enemygroup.add(Chavo("Chavo", chavobutton.returndifficulty()))
+            enemygroup.add(Frederick("Frederick", frederickbutton.returndifficulty()))
             states.append(game)
 
 # Game Map
@@ -517,6 +567,7 @@ inback = False
 power = 20000
 inplay = False
 jumpscaretimer = 0
+hacked = False
 
 # Camera function
 def numcam():
@@ -632,12 +683,13 @@ def game(screen):
         states.append(win)
     if power <= 0:
         states.append(lose)
+    can_rain = camerapos != 6 and not hacked
     if incameras:
         screen.fill((0, 0, 0))
         numcam()
         screen.blit(cameraposarray[camerapos], (0, 0))
         enemygroup.update()
-        if camerapos != 6:
+        if can_rain:
             rain(screen)
         screen.blit(dark, (0, 0))
         if keys[pygame.K_c] and cooldown("cameras", 0.2):
@@ -679,33 +731,7 @@ def lose(screen):
         states.pop()
         states.pop()
 
-#==================================================================================================#
-#i made a skiddi grapah look at this graaaph
-class Minigametree():
-    def __init__(self):
-        self.left_rect = pygame.Rect(550, 400, 200, 200)
-        self.right_rect = pygame.Rect(1150, 400, 200, 200)
-        self.color = (255, 255, 255, 128)  # Translucent white
-        self.nodelist = []
 
-    def update(self, screen):
-        pygame.draw.rect(screen, self.color, self.left_rect)
-        pygame.draw.rect(screen, self.color, self.right_rect)
-
-minigame = Minigametree()
-
-class Node():
-    def __init__(self, left, right, color):
-        self.left = left
-        self.right = right
-        self.color = color
-        self.rect = self.obtainpos()
-    
-    def obtainpos(self):
-        if self.left:
-            return pygame.rect(random.randint(550, 750), random.randint(400, 600), 10, 10)
-        if self.right:
-            return pygame.rect(random.randint(1150, 1350), random.randint(400, 600), 10, 10)
 
 # Main loop
 states = [mainscreen]
