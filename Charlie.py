@@ -276,10 +276,10 @@ cobybutton = CustomEnemy("Coby", 0, pygame.image.load("Data/States/Custom/Coby.p
 customenemygroup.add(cobybutton)
 codybutton = CustomEnemy("Cody", 0, pygame.image.load("Data/States/Custom/Cody.png"), 530, 510)
 customenemygroup.add(codybutton)
-cedrickbutton = CustomEnemy("Cedrick", 0, pygame.image.load("Data/States/Custom/Cedrick.png"), 1010, 510)
-customenemygroup.add(cedrickbutton)
-chavobutton = CustomEnemy("Chavo", 0, pygame.image.load("Data/States/Custom/Chavo.png"), 770, 250)
+chavobutton = CustomEnemy("Cedrick", 0, pygame.image.load("Data/States/Custom/Cedrick.png"), 1010, 510)
 customenemygroup.add(chavobutton)
+cedrickbutton = CustomEnemy("Chavo", 0, pygame.image.load("Data/States/Custom/Chavo.png"), 770, 250)
+customenemygroup.add(cedrickbutton)
 frederickbutton = (CustomEnemy("Frederick", 0, pygame.image.load("Data/States/Custom/Frederick.png"), 1010, 250))
 customenemygroup.add(frederickbutton)
 fredderickbutton = (CustomEnemy("FredDerick", 0, pygame.image.load("Data/States/Custom/Fred_Derrick.png"), 770, 510))
@@ -458,12 +458,13 @@ class Frederick(Enemy):
     def move(self):
         global cameraposarray,hacked,hack_pos
         hacked = True
-        shuffledcameras = []
-        for i in range(0,8):
-            shuffledcameras.append(self.hack)
-        self.hack_pos = random.randint(0,7)
-        shuffledcameras[self.hack_pos] = self.revealed
-        cameraposarray[1:] = shuffledcameras
+        if hacked:
+            shuffledcameras = []
+            for i in range(0,8):
+                shuffledcameras.append(self.hack)
+            self.hack_pos = random.randint(0,7)
+            shuffledcameras[self.hack_pos] = self.revealed
+            cameraposarray[1:] = shuffledcameras
     def camera_click(self):
         global cameraposarray,hacked
         if self.hack_pos + 1 == camerapos and mousepress[0] and hacked and incameras:
@@ -471,7 +472,6 @@ class Frederick(Enemy):
             hacked = False
         elif mousepress[0] and hacked and incameras and cooldown("Wrong_Hack",0.3):
             self.tries -= 1
-            print(mousepress)
         if self.tries <= 0:
             self.cankill = True
     def update(self):
@@ -645,13 +645,14 @@ def reset():
     power = 40000
     rawtime = int(time.time())
     inplay = True
+    hacked = False
     enemygroup.empty()
 
 # Game
 def game(screen):
     global inoffice, flashlighton, flashlightpos, incameras, inback, power, rawtime
     power -= 2
-    powerdisplay = powerfont.render(str(power//200)+"%", True, "White")
+    powerdisplay = powerfont.render(str(power//400)+"%", True, "White")
     elapsed_time = (int(time.time()) - rawtime) * 2  # Double the elapsed time
     if (elapsed_time // 60) >= 1:
         TimeDisplay = powerfont.render("TIME: " + str(elapsed_time // 60) + "AM", True, "White")
