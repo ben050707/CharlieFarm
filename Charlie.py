@@ -503,32 +503,69 @@ class FredDerick(Enemy):
         pass
 
 #==================================================================================================#
-#i made a skiddi grapah look at this graaaph
-class Minigametree():
-    def __init__(self):
-        self.left_rect = pygame.Rect(550, 400, 200, 200)
-        self.right_rect = pygame.Rect(1150, 400, 200, 200)
-        self.color = (255, 255, 255, 128)  # Translucent white
-        self.nodelist = []
+ # Ensure one of each color per side
 
-    def update(self, screen):
-        pygame.draw.rect(screen, self.color, self.left_rect)
-        pygame.draw.rect(screen, self.color, self.right_rect)
-
-minigame = Minigametree()
-
-class Node():
-    def __init__(self, left, right, color):
-        self.left = left
-        self.right = right
+class Node:
+    def __init__(self, x, y, color):
+        self.x = x
+        self.y = y
         self.color = color
-        self.rect = self.obtainpos()
-    
-    def obtainpos(self):
-        if self.left:
-            return pygame.rect(random.randint(550, 750), random.randint(400, 600), 10, 10)
-        if self.right:
-            return pygame.rect(random.randint(1150, 1350), random.randint(400, 600), 10, 10)
+        self.connected = False
+
+    def draw(self, screen):
+        pygame.draw.circle(screen, self.color, (self.x, self.y), 10)
+        pygame.draw.circle(screen, "black", (self.x, self.y), 10, 2)  # Outline
+
+class Tree:
+    def __init__(self):
+        self.colors = ["red", "green", "blue", "yellow", "orange", "purple", "pink", "white", "brown"]
+        self.left_nodes = [Node(random.randint(400, 700), random.randint(400, 600), self.colors[i]) for i in range(len(self.colors))]
+        self.right_nodes = [Node(random.randint(1150, 1450), random.randint(400, 600), self.colors[i]) for i in range(len(self.colors))]  # Ensure one per side
+        self.connections = []
+        self.selected_node = None
+
+    def draw_nodes(self, screen):
+        for node in self.left_nodes + self.right_nodes:
+            node.draw(screen)
+
+    def draw_connections(self, screen):
+        for (node1, node2) in self.connections:
+            pygame.draw.line(screen, "brown", (node1.x, node1.y), (node2.x, node2.y), 5)
+        
+        if self.selected_node and mousepos:
+            pygame.draw.line(screen, "brown", (self.selected_node.x, self.selected_node.y), mousepos, 2)
+
+    def find_node(self, x, y):
+        for node in self.left_nodes + self.right_nodes:
+            if (node.x - 10 < x < node.x + 10) and (node.y - 10 < y < node.y + 10):
+                return node
+        return None
+
+    def handle_event(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            x, y = pygame.mouse.get_pos()
+            self.selected_node = self.find_node(x, y)
+        elif event.type == pygame.MOUSEMOTION:
+            mousepos = pygame.mouse.get_pos()
+        elif event.type == pygame.MOUSEBUTTONUP and self.selected_node:
+            x, y = pygame.mouse.get_pos()
+            target_node = self.find_node(x, y)
+            
+            # Ensure connection is valid
+            if target_node and target_node != self.selected_node:
+                if self.selected_node.color == target_node.color and (self.selected_node in self.left_nodes) != (target_node in self.left_nodes):
+                    self.connections.append((self.selected_node, target_node))
+            
+            self.selected_node = None  # Reset selection
+            mousepos = None  # Reset mouse position
+
+tree = Tree()
+
+
+def minigameevent(screen):
+    screen.blit(back, (0,0))
+    tree.draw_nodes(screen)
+    tree.draw_connections(screen)  
 #==================================================================================================#
 # Customscreen
 def customscreen(screen):
@@ -690,9 +727,8 @@ def game(screen):
             incameras = True
             inoffice = False
         if keys[pygame.K_x] and cooldown("back", 0.2):
-            for n in range(0, fredderickbutton.returndifficulty()):
-                inback = True
-                inoffice = False
+            inback = True
+            inoffice = False
         if not flashlighton and not dying:
             screen.blit(dark, (0, 0))
         if flashlighton and not dying:
@@ -753,7 +789,8 @@ def lose(screen):
 
 
 # Main loop
-states = [mainscreen]
+#states = [mainscreen]
+states = [minigameevent]
 
 while True:
     mousepos = pygame.mouse.get_pos()
@@ -763,6 +800,8 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
+        else:
+            tree.handle_event(event)
     time2dp = round(time.time(),2)
     
     # Clear the screen
