@@ -431,7 +431,7 @@ class Chavo(Enemy):
                     self.image = self.rest
                 if not drclosed:
                     self.cankill = True
-        elif not incameras:
+        elif not incameras or hacked:
             super().move()
     
     def positionswitch(self):
@@ -444,21 +444,39 @@ class Frederick(Enemy):
     def __init__(self, name, difficulty):
         super().__init__(name, difficulty)
         self.rest = pygame.image.load("Data/Characters/Frederick/FrederickRest.png")
-        self.hack = pygame.image.load("Data/Characters/Frederick/FrederickHack.png")
-        self.revealed = pygame.image.load("Data/Characters/Frederick/FrederickRevealed.png")
+        self.hack = imgimport("Data/Characters/Frederick/FrederickHack.png", (1920, 1080))
+        self.revealed = imgimport("Data/Characters/Frederick/FrederickRevealed.png", (1920, 1080))
+        self.jumpscare = jumpscareload("Frederick")
         self.image = self.rest
         self.imagearray = [self.rest, self.hack, self.revealed]
-        self.ticktime = 1
-        self.screenpos = (400, 400) 
+        self.ticktime = 5
+        self.screenpos = (400, 400)
+        self.tries = 2
+        self.cankill = False
+        self.hack_pos = 0
     
     def move(self):
-        global cameraposarray,hacked
+        global cameraposarray,hacked,hack_pos
         hacked = True
         shuffledcameras = []
         for i in range(0,8):
             shuffledcameras.append(self.hack)
-        shuffledcameras[random.randint(0,7)] = self.revealed
+        self.hack_pos = random.randint(0,7)
+        shuffledcameras[self.hack_pos] = self.revealed
         cameraposarray[1:] = shuffledcameras
+    def camera_click(self):
+        global cameraposarray,hacked
+        if self.hack_pos + 1 == camerapos and mousepress[0] and hacked and incameras:
+            cameraposarray = [0, lwall, lhall, coop, rhall, rwall, fhall, uhall, uwall]
+            hacked = False
+        elif mousepress[0] and hacked and incameras and cooldown("Wrong_Hack",0.3):
+            self.tries -= 1
+            print(mousepress)
+        if self.tries <= 0:
+            self.cankill = True
+    def update(self):
+        self.camera_click()
+        super().update()
         
         
     
