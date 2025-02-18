@@ -2,7 +2,7 @@ import pygame
 import random
 import time
 import os
-
+import Database
 pygame.init()
 screen = pygame.display.set_mode((1920, 1080))
 pygame.display.set_caption("Charlie's Farm")
@@ -14,11 +14,16 @@ rawtime = int(time.time())
 dying = False
 #==================================================================================================#
 #LAST DONE:
-#chavo like freddy fnaf 1
+#all character sfunctiining
 
 #TO ADD:
-#too many enemies come into the office at once
-#fred derick chicken
+#Databse design/leaderbaord ready
+#error handling
+# predetermined nights (progres is stored using eggs that will be stored in database)
+# balancing
+# sprites of charcaters
+# sounds
+#
 
 #i made a dictionary for cooldown function
 cooldowns = {}
@@ -473,10 +478,15 @@ class Frederick(Enemy):
         elif mousepress[0] and hacked and incameras and cooldown("Wrong_Hack",0.3):
             self.tries -= 1
         if self.tries <= 0:
+            hacked = False
             self.cankill = True
+
     def update(self):
         self.camera_click()
-        super().update()
+        self.display()
+        self.tick()
+        self.positionswitch()
+        self.killplayer()
         
         
     
@@ -493,12 +503,31 @@ class FredDerick(Enemy):
         self.wall = pygame.image.load("Data/Characters/FredDerick/FredDerickWall.png")
         self.jumpscare = jumpscareload("FredDerick")
         self.image = self.rest
-        self.imagearray = [self.rest, self.hall, self.wall]
-        self.chance = 3
-        self.ticktime = 20
+        self.imagearray = [self.wall, self.hall, self.rest]
+        self.chance = 2
+        if self.difficulty == 0:
+            self.ticktime = 1000
+        else:
+            self.ticktime = ((11 - self.difficulty) / 2)
         self.flashlight = (-1700, -500)
         self.screenpos = (400, 400)
-
+    def tick(self):
+        global jumpscaretimer, tree
+        if self.pos == 0:
+            self.flashlight_sight()
+        if cooldown(self.name, self.ticktime):
+            if len(tree.connections) != 0:
+                tree.connections.pop()
+            if len(tree.connections) == 0:
+                if self.chance != 0:
+                    tree.connect_nodes()
+                    self.chance -= 1
+                else:
+                    self.cankill = True
+    def display(self):
+        global inback
+        if inback:
+            screen.blit(self.imagearray[self.chance], self.screenpos)
     def move(self):
         pass
 
@@ -521,9 +550,15 @@ class Tree:
         self.colors = ["red", "green", "blue", "yellow", "orange", "purple", "pink", "white", "brown"]
         self.left_nodes = [Node(random.randint(400, 700), random.randint(400, 600), self.colors[i]) for i in range(len(self.colors))]
         self.right_nodes = [Node(random.randint(1150, 1450), random.randint(400, 600), self.colors[i]) for i in range(len(self.colors))]  # Ensure one per side
-        self.connections = []
+        self.connections = set()
         self.selected_node = None
+        self.connect_nodes()
 
+    def connect_nodes(self):
+            for left_node in self.left_nodes:
+                for right_node in self.right_nodes:
+                    if left_node.color == right_node.color:
+                        self.connections.add((left_node, right_node))
     def draw_nodes(self, screen):
         for node in self.left_nodes + self.right_nodes:
             node.draw(screen)
@@ -554,7 +589,8 @@ class Tree:
             # Ensure connection is valid
             if target_node and target_node != self.selected_node:
                 if self.selected_node.color == target_node.color and (self.selected_node in self.left_nodes) != (target_node in self.left_nodes):
-                    self.connections.append((self.selected_node, target_node))
+                    if (self.selected_node, target_node) not in self.connections or (target_node, self.selected_node) not in self.connections:
+                        self.connections.add((self.selected_node, target_node))
             
             self.selected_node = None  # Reset selection
             mousepos = None  # Reset mouse position
@@ -563,7 +599,6 @@ tree = Tree()
 
 
 def minigameevent(screen):
-    screen.blit(back, (0,0))
     tree.draw_nodes(screen)
     tree.draw_connections(screen)  
 #==================================================================================================#
@@ -587,6 +622,7 @@ def customscreen(screen):
             enemygroup.add(Cody("Cody", codybutton.returndifficulty()))
             enemygroup.add(Cedrick("Cedrick", cedrickbutton.returndifficulty()))
             enemygroup.add(Chavo("Chavo", chavobutton.returndifficulty()))
+            enemygroup.add(FredDerick("FredDerick", fredderickbutton.returndifficulty()))
             enemygroup.add(Frederick("Frederick", frederickbutton.returndifficulty()))
             states.append(game)
 
@@ -670,7 +706,7 @@ def door(side):
 #Reset game variables function
 
 def reset():
-    global inoffice, incameras, inback, flashlighton, flashlightpos, incameras, inback, power, rawtime, inplay, jumpscaretimer
+    global inoffice, incameras, inback, flashlighton, flashlightpos, incameras, inback, power, rawtime, inplay, jumpscaretimer, hacked, tree, cameraposarray
     jumpscaretimer = 0
     inoffice = True
     flashlighton = False
@@ -684,10 +720,12 @@ def reset():
     inplay = True
     hacked = False
     enemygroup.empty()
+    tree = Tree()
+    cameraposarray = [0, lwall, lhall, coop, rhall, rwall, fhall, uhall, uwall]
 
 # Game
 def game(screen):
-    global inoffice, flashlighton, flashlightpos, incameras, inback, power, rawtime
+    global inoffice, flashlighton, flashlightpos, incameras, inback, power, rawtime, hacked
     power -= 2
     powerdisplay = powerfont.render(str(power//400)+"%", True, "White")
     elapsed_time = (int(time.time()) - rawtime) * 2  # Double the elapsed time
@@ -754,11 +792,12 @@ def game(screen):
         screen.fill((0, 0, 0))
         screen.blit(back, (0, 0))
         enemygroup.update()
+        tree.draw_nodes(screen)
+        tree.draw_connections(screen)  
         screen.blit(dark, (0, 0))
         if keys[pygame.K_x] and cooldown("back", 0.2):
             inoffice = True
             inback = False
-        minigame.update(screen)
     if not dying:
         screen.blit(powerdisplay,(0,1000))
         screen.blit(TimeDisplay, (0,0))
@@ -789,8 +828,7 @@ def lose(screen):
 
 
 # Main loop
-#states = [mainscreen]
-states = [minigameevent]
+states = [mainscreen]
 
 while True:
     mousepos = pygame.mouse.get_pos()
