@@ -26,6 +26,17 @@ dying = False
 #
 
 #i made a dictionary for cooldown function
+
+
+#DATA STRUCTURES ADDED:
+#LIST
+#STACK
+#SET
+#DICTIONARY
+#FEATURES - ==================================
+#Tree
+#OOP
+#Databnse
 cooldowns = {}
 
 def cooldown(key, duration): 
