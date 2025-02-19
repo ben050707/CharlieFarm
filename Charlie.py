@@ -36,7 +36,7 @@ dying = False
 #FEATURES - ==================================
 #Tree
 #OOP
-#Databnse
+#Database
 cooldowns = {}
 
 def cooldown(key, duration): 
@@ -118,6 +118,21 @@ beginbutton = pygame.image.load("data/states/custom/Begin.png")
 beginbuttonr = pygame.image.load("data/states/custom/BeginR.png")
 beginbuttonp = pygame.image.load("data/states/custom/BeginP.png")
 beginbuttonrect = beginbutton.get_rect(center = (1500, 850))
+#==================================================================================================#
+
+# Options buttons
+
+loginbutton = pygame.image.load("Data/states/options/loginbutton.png")
+loginbuttonp = pygame.image.load("Data/states/options/loginbuttonp.png")
+
+logoutbutton = pygame.image.load("Data/states/options/logoutbutton.png")
+logoutbuttonp = pygame.image.load("Data/states/options/logoutbuttonp.png")
+
+leaderboardbutton = pygame.image.load("Data/states/options/leaderboardbutton.png")
+leaderboardbuttonp = pygame.image.load("Data/states/options/leaderboardbuttonp.png")
+
+leftbutton = pygame.image.load("Data/states/options/left.png")
+rightbutton = pygame.image.load("Data/states/options/right.png")
 #==================================================================================================#
 
 # Character Class
@@ -519,7 +534,7 @@ class FredDerick(Enemy):
         if self.difficulty == 0:
             self.ticktime = 1000
         else:
-            self.ticktime = ((11 - self.difficulty) / 2)
+            self.ticktime = ((11 - self.difficulty))
         self.flashlight = (-1700, -500)
         self.screenpos = (400, 400)
     def tick(self):
@@ -527,7 +542,7 @@ class FredDerick(Enemy):
         if self.pos == 0:
             self.flashlight_sight()
         if cooldown(self.name, self.ticktime):
-            if len(tree.connections) != 0:
+            if len(tree.connections) != 0 and self.ticktime != 15 and not inback:
                 tree.connections.pop()
             if len(tree.connections) == 0:
                 if self.chance != 0:
