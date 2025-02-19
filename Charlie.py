@@ -118,23 +118,100 @@ beginbutton = pygame.image.load("data/states/custom/Begin.png")
 beginbuttonr = pygame.image.load("data/states/custom/BeginR.png")
 beginbuttonp = pygame.image.load("data/states/custom/BeginP.png")
 beginbuttonrect = beginbutton.get_rect(center = (1500, 850))
+
 #==================================================================================================#
 
-# Options buttons
+#Options buttons
 
-loginbutton = pygame.image.load("Data/states/options/loginbutton.png")
-loginbuttonp = pygame.image.load("Data/states/options/loginbuttonp.png")
+loginbutton = pygame.image.load("data/states/Options/loginbutton.png")
+loginbuttonp = pygame.image.load("data/states/Options/loginbuttonp.png")
+loginbuttonrect = loginbutton.get_rect(center = (300, 600))
 
-logoutbutton = pygame.image.load("Data/states/options/logoutbutton.png")
-logoutbuttonp = pygame.image.load("Data/states/options/logoutbuttonp.png")
+logoutbutton = pygame.image.load("data/states/Options/logoutbutton.png")
+logoutbuttonp = pygame.image.load("data/states/Options/logoutbuttonp.png")
+logoutbuttonrect = logoutbutton.get_rect(center = (300, 750))
 
-leaderboardbutton = pygame.image.load("Data/states/options/leaderboardbutton.png")
-leaderboardbuttonp = pygame.image.load("Data/states/options/leaderboardbuttonp.png")
+leaderboardbutton = pygame.image.load("data/states/Options/leaderboardbutton.png")
+leaderboardbuttonp = pygame.image.load("data/states/Options/leaderboardbuttonp.png")
+leaderboardbuttonrect = leaderboardbutton.get_rect(center = (300, 900))
 
-leftbutton = pygame.image.load("Data/states/options/left.png")
-rightbutton = pygame.image.load("Data/states/options/right.png")
+leftbutton = pygame.image.load("data/states/Options/left.png")
+leftbuttonrect = leftbutton.get_rect(center = (300, 600))
+
+rightbutton = pygame.image.load("data/states/Options/right.png")
+rightbuttonrect = rightbutton.get_rect(center = (300, 1100))
+
+optionsbackbuttonrect = backbutton.get_rect(topleft = (600, 850))
+loginscreenbuttonrect = loginbutton.get_rect(topleft = (750, 900))
+
+logingui = imgimport("data/states/Options/logingraphic.png", (1920, 1080))
+
+usernamerect = pygame.rect.Rect(500, 350, 840, 140)
+passwordrect = pygame.rect.Rect(500, 725, 840, 140)
 #==================================================================================================#
 
+#Database configuration
+#==================================================================================================#
+class keyboard:
+    def __init__(self):
+        self.letter_array = []
+        self.word = ""
+        self.can_type = True
+        self.type_marker_timer = 0
+        self.focus = False  # Tracks whether this input field is active
+
+    def backspace(self):
+        if len(self.letter_array) > 0:
+            self.letter_array.pop()
+
+    def add(self, input):
+        if self.can_type and self.focus:  # Only process input if this field is focused
+            if (input >= 97 and input <= 122) or (input >= 48 and input <= 57):  # Letters and numbers
+                self.type(input)
+            if input == 8:  # Backspace
+                self.backspace()
+
+    def type(self, input):
+        letters = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
+        numbers = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+        typekey = ""
+        if input >= 97 and input <= 122:  # Letters
+            input -= 97
+            typekey = letters[input]
+        if input >= 48 and input <= 57:  # Numbers
+            input -= 48
+            typekey = numbers[input]
+
+        self.letter_array.append(typekey)
+
+    def display(self, rect):
+        username = ""
+        for letter in self.letter_array:
+            username += letter
+
+        display_name = pygame.font.Font.render(powerfont, username, False, "White")
+        display_name_rect = display_name.get_rect(center=rect.center)
+        if display_name_rect.width > rect.width - 180:
+            self.can_type = False
+        else:
+            self.can_type = True
+        screen.blit(display_name, display_name_rect)
+
+        # Display the type marker (blinking cursor) only if this field is focused
+        if self.focus:
+            type_marker = pygame.font.Font.render(powerfont, "|", False, "Grey")
+            self.type_marker_timer += 0.01
+            if self.type_marker_timer >= 2:
+                screen.blit(type_marker, (display_name_rect.topright))
+            if self.type_marker_timer >= 4:
+                self.type_marker_timer = 0
+
+    def get_word(self):
+        self.word = "".join(self.letter_array)
+        return self.word
+
+usernameinput = keyboard()
+passwordinput = keyboard()
 # Character Class
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, name, difficulty):
@@ -294,12 +371,53 @@ def mainscreen(screen):
 # Options
 def options(screen):
     vhs(screen)
+    screen.blit(loginbutton, loginbuttonrect)
+    if loginbuttonrect.collidepoint(mousepos):
+        screen.blit(loginbuttonp, loginbuttonrect)
+        if mousepress[0]:
+            states.append(login)
+    screen.blit(logoutbutton, logoutbuttonrect)
+    screen.blit(leaderboardbutton, leaderboardbuttonrect)
+    screen.blit(backbutton, (600, 850))
+    if optionsbackbuttonrect.collidepoint(mousepos):
+        screen.blit(backbuttonp, (600, 850))
+        if mousepress[0]:
+            states.pop()
+
+def login(screen):
+    global usernameinput, passwordinput
+
+    screen.blit(logingui, (0, 0))
     screen.blit(backbutton, backbuttonrect)
+    screen.blit(loginbutton, loginscreenbuttonrect)
+
+    # Display username and password fields
+    usernameinput.display(usernamerect)
+    passwordinput.display(passwordrect)
+
+    # Handle focus switching
+    if mousepress[0]:  # Check for mouse click
+        if usernamerect.collidepoint(mousepos):  # Clicked on username field
+            usernameinput.focus = True
+            passwordinput.focus = False
+        elif passwordrect.collidepoint(mousepos):  # Clicked on password field
+            usernameinput.focus = False
+            passwordinput.focus = True
+        else:  # Clicked outside both fields
+            usernameinput.focus = False
+            passwordinput.focus = False
+
+    # Handle back button
     if backbuttonrect.collidepoint(mousepos):
         screen.blit(backbuttonp, backbuttonrect)
         if mousepress[0]:
             states.pop()
 
+    if loginscreenbuttonrect.collidepoint(mousepos):
+        screen.blit(loginbuttonp, loginscreenbuttonrect)
+        if mousepress[0]:
+            Database.add_user(usernameinput.get_word(), passwordinput.get_word())
+            states.pop()
 #==================================================================================================#
 
 # Custom Enemies
@@ -534,15 +652,15 @@ class FredDerick(Enemy):
         if self.difficulty == 0:
             self.ticktime = 1000
         else:
-            self.ticktime = ((11 - self.difficulty))
+            self.ticktime = (10 - self.difficulty)
         self.flashlight = (-1700, -500)
         self.screenpos = (400, 400)
     def tick(self):
         global jumpscaretimer, tree
         if self.pos == 0:
             self.flashlight_sight()
-        if cooldown(self.name, self.ticktime):
-            if len(tree.connections) != 0 and self.ticktime != 15 and not inback:
+        if cooldown(self.name, self.ticktime) and not inback:
+            if len(tree.connections) != 0:
                 tree.connections.pop()
             if len(tree.connections) == 0:
                 if self.chance != 0:
@@ -860,22 +978,33 @@ while True:
     mousepos = pygame.mouse.get_pos()
     mousepress = pygame.mouse.get_pressed()
     keys = pygame.key.get_pressed()
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
+        elif event.type == pygame.KEYDOWN:
+            # Handle keypresses only if the login screen is active
+            if states[-1] == login:
+                if usernameinput.focus:
+                    usernameinput.add(event.key)
+                elif passwordinput.focus:
+                    passwordinput.add(event.key)
+            if event.key == pygame.K_ESCAPE:
+                pygame.quit()
+                exit()
         else:
             tree.handle_event(event)
-    time2dp = round(time.time(),2)
-    
+
     # Clear the screen
     screen.fill((0, 0, 0))
-    
+
     # Call the current state function
     states[-1](screen)
-    
+
     # Update the display
     pygame.display.flip()
-    
+
     # Cap the frame rate
     clock.tick(60)
+    time2dp = round(time.time(),2)
