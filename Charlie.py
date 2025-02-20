@@ -12,6 +12,8 @@ center = (600, 450)
 transparent = (0, 0, 0, 0)
 rawtime = int(time.time())
 dying = False
+current_user = None
+final_score = 0
 #==================================================================================================#
 #LAST DONE:
 #all character sfunctiining
@@ -355,37 +357,95 @@ def mainscreen(screen):
     
     if playbuttonrect.collidepoint(mousepos):
         screen.blit(playbuttonp, playbuttonrect)
-        if mousepress[0]:
+        if mousepress[0]and cooldown("button",0.3):
             states.append(customscreen)
     if optionsbuttonrect.collidepoint(mousepos):
         screen.blit(optionsbuttonp, optionsbuttonrect)
-        if mousepress[0]:
+        if mousepress[0]and cooldown("button",0.3):
             states.append(options)
     if quitbuttonrect.collidepoint(mousepos):
         screen.blit(quitbuttonp, quitbuttonrect)
-        if mousepress[0]:
+        if mousepress[0]and cooldown("button",0.3):
             pygame.quit()
             exit()
 #==================================================================================================#
 
 # Options
 def options(screen):
+    global mousepos, mousepress, current_user
+
     vhs(screen)
     screen.blit(loginbutton, loginbuttonrect)
     if loginbuttonrect.collidepoint(mousepos):
         screen.blit(loginbuttonp, loginbuttonrect)
-        if mousepress[0]:
+        if mousepress[0]and cooldown("button",0.3):
             states.append(login)
+
     screen.blit(logoutbutton, logoutbuttonrect)
     screen.blit(leaderboardbutton, leaderboardbuttonrect)
     screen.blit(backbutton, (600, 850))
+
+    # Display the currently logged-in user
+    if current_user:
+        logged_in_text = powerfont.render(f"Logged in as: {current_user}", True, "White")
+        screen.blit(logged_in_text, (300, 200))  # Adjust position as needed
+    else:
+        logged_in_text = powerfont.render("Not logged in", True, "White")
+        screen.blit(logged_in_text, (300, 200))  # Adjust position as needed
+
+    # Handle logout button click
+    if logoutbuttonrect.collidepoint(mousepos):
+        screen.blit(logoutbuttonp, logoutbuttonrect)
+        if mousepress[0] and current_user and cooldown("button",0.3):  # Only log out if a user is logged in
+            Database.logout_user()
+            current_user = None  # Reset the current user
+            print("Logged out successfully.")
+        elif mousepress[0] and not current_user and cooldown("button",0.3):
+            print("No user is currently logged in.")
+
+    # Handle back button click
     if optionsbackbuttonrect.collidepoint(mousepos):
         screen.blit(backbuttonp, (600, 850))
-        if mousepress[0]:
+        if mousepress[0] and cooldown("button",0.3):
             states.pop()
 
+    # Handle leaderboard button click
+    if leaderboardbuttonrect.collidepoint(mousepos):
+        screen.blit(leaderboardbuttonp, leaderboardbuttonrect)
+        if mousepress[0] and cooldown("button",0.3):
+            states.append(leaderboard)  # Switch to the leaderboard state
+
+def leaderboard(screen):
+    global mousepos, mousepress
+
+    # Clear the screen
+    screen.fill((0, 0, 0))
+
+    # Display the leaderboard title
+    title = powerfont.render("Leaderboard", True, "White")
+    screen.blit(title, (600, 100))
+
+    # Fetch the leaderboard data from the database
+    leaderboard_data = Database.get_leaderboard(limit=10)  # Get top 10 high scores
+
+    # Display each entry in the leaderboard
+    y_offset = 200
+    for rank, (username, highscore) in enumerate(leaderboard_data, start=1):
+        entry_text = f"{rank}. {username}: {highscore}"
+        entry_surface = powerfont.render(entry_text, True, "White")
+        screen.blit(entry_surface, (600, y_offset))
+        y_offset += 50  # Move down for the next entry
+
+    # Display the back button
+    screen.blit(backbutton, (600, 850))
+    if optionsbackbuttonrect.collidepoint(mousepos):
+        screen.blit(backbuttonp, (600, 850))
+        if mousepress[0] and cooldown("button",0.3):
+            states.pop()  # Go back to the previous state (options)
+
+
 def login(screen):
-    global usernameinput, passwordinput
+    global usernameinput, passwordinput, current_user
 
     screen.blit(logingui, (0, 0))
     screen.blit(backbutton, backbuttonrect)
@@ -410,14 +470,49 @@ def login(screen):
     # Handle back button
     if backbuttonrect.collidepoint(mousepos):
         screen.blit(backbuttonp, backbuttonrect)
-        if mousepress[0]:
+        if mousepress[0] and cooldown("button",0.3):
             states.pop()
 
+    # Handle login button click
     if loginscreenbuttonrect.collidepoint(mousepos):
         screen.blit(loginbuttonp, loginscreenbuttonrect)
         if mousepress[0]:
-            Database.add_user(usernameinput.get_word(), passwordinput.get_word())
+            username = usernameinput.get_word()
+            password = passwordinput.get_word()
+            if Database.login_user(username, password):
+                current_user = username  # Set the current user
+                print(f"Logged in as {current_user}.")
+                states.pop()
+            else:
+                print("Invalid username or password.")
+
+    # Handle login button click
+    if loginscreenbuttonrect.collidepoint(mousepos):
+        screen.blit(loginbuttonp, loginscreenbuttonrect)
+        if mousepress[0]:
+            username = usernameinput.get_word()
+            password = passwordinput.get_word()
+            Database.add_user(username, password)
+            current_user = username  # Set the current user
+            print(f"Logged in as {current_user}.")
             states.pop()
+
+def calculate_final_score():
+    global final_score
+    final_score = 0
+    for enemy in enemygroup:
+        final_score += enemy.difficulty * 10  # Each difficulty point counts as 10 points
+    print(f"Final Score: {final_score}")
+
+def update_highscore_if_needed():
+    global current_user, final_score
+    if current_user:
+        current_highscore = Database.get_highscore(current_user)
+        if final_score > current_highscore:
+            Database.update_highscore(current_user, final_score)
+            print(f"New high score: {final_score}")
+        else:
+            print(f"Current high score: {current_highscore} (Final score: {final_score})")
 #==================================================================================================#
 
 # Custom Enemies
@@ -461,10 +556,22 @@ class Coby(Enemy):
         self.flashlight = (-1700, -500)
         self.screenpos = (400, 400)
 
-    def move(self):
-        global inplay
+    def tick(self):
+        global jumpscaretimer
         if self.pos == 0:
             if dlclosed:
+                self.ticktime = 0.5
+            elif not dlclosed:
+                self.flashlight_sight()
+        if cooldown(self.name, self.ticktime):
+            if self.difficulty > random.randint(0, 20):
+                self.move()
+
+    def move(self):
+        global inplay, power
+        if self.pos == 0:
+            if dlclosed:
+                self.ticktime = 2
                 self.pos = 3
                 self.image = self.rest
             if not dlclosed:
@@ -493,11 +600,24 @@ class Cody(Enemy):
         self.ticktime = 2
         self.flashlight = (-230, -500)
         self.screenpositon = (800, 400)
+    
+    def tick(self):
+            global jumpscaretimer
+            if self.pos == 0:
+                if drclosed:
+                    self.ticktime = 0.5
+                elif not drclosed:
+                    self.ticktime = 2
+                    self.flashlight_sight()
+            if cooldown(self.name, self.ticktime):
+                if self.difficulty > random.randint(0, 20):
+                    self.move()
 
     def move(self):
         global inplay
         if self.pos == 0:
             if drclosed:
+                self.ticktime = 2
                 self.pos = 3
                 self.image = self.rest
             if not drclosed:
@@ -544,8 +664,10 @@ class Cedrick(Enemy):
         if flashlightpos == self.flashlight and flashlighton:
             self.flashlight_time += 1
             self.flashed = True
+            self.ticktime = 0.5
         else:
             self.flashed = False
+            self.ticktime = 2
         if self.flashlight_time >= 200:
             self.activated = False
             self.flashlight_time = 0
@@ -748,6 +870,8 @@ def minigameevent(screen):
 #==================================================================================================#
 # Customscreen
 def customscreen(screen):
+    global final_score
+
     vhs(screen)
     screen.blit(customborders, (360, 90))
     screen.blit(backbutton, backbuttonrect)
@@ -756,7 +880,7 @@ def customscreen(screen):
     customenemygroup.update()
     if backbuttonrect.collidepoint(mousepos):
         screen.blit(backbuttonp, backbuttonrect)
-        if mousepress[0]:
+        if mousepress[0] and cooldown("button",0.3):
             states.pop()
     if beginbuttonrect.collidepoint(mousepos):
         screen.blit(beginbuttonp, beginbuttonrect)
@@ -768,6 +892,7 @@ def customscreen(screen):
             enemygroup.add(Chavo("Chavo", chavobutton.returndifficulty()))
             enemygroup.add(FredDerick("FredDerick", fredderickbutton.returndifficulty()))
             enemygroup.add(Frederick("Frederick", frederickbutton.returndifficulty()))
+            calculate_final_score()  # Calculate the final score
             states.append(game)
 
 # Game Map
@@ -949,10 +1074,21 @@ def game(screen):
 
 # Win Screen
 def win(screen):
+    global final_score, current_user
+
     screen.fill((0, 0, 0))
     vhs(screen)
     win = powerfont.render("You Win (Press space to return to menu)", True, "White")
     screen.blit(win, center)
+
+    # Update the high score if needed
+    update_highscore_if_needed()
+
+    # Add the final score to the user's money
+    if current_user:
+        Database.change_money(final_score)
+        print(f"Added {final_score} to {current_user}'s money.")
+
     if keys[pygame.K_SPACE]:
         states.pop()
         states.pop()
