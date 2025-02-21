@@ -14,6 +14,8 @@ rawtime = int(time.time())
 dying = False
 current_user = None
 final_score = 0
+flashlevel = 0
+canpurchase = True
 #==================================================================================================#
 #LAST DONE:
 #all character sfunctiining
@@ -152,6 +154,21 @@ usernamerect = pygame.rect.Rect(500, 350, 840, 140)
 passwordrect = pygame.rect.Rect(500, 725, 840, 140)
 #==================================================================================================#
 
+#Shop buttons
+
+shopbutton = pygame.image.load("data/states/shop/shopbutton.png")
+shopbuttonp = pygame.image.load("data/states/shop/shopbuttonp.png")
+shopbuttonrect = shopbutton.get_rect(center = (600, 600))
+
+buybutton = pygame.image.load("data/states/shop/buybutton.png")
+buybuttonp = pygame.image.load("data/states/shop/buybuttonp.png")
+cantbuy = pygame.image.load("data/states/shop/expensive.png")
+buybuttonrect = buybutton.get_rect(center = (600, 600))
+
+bat1 = pygame.image.load("data/states/shop/bat1.png")
+bat2 = pygame.image.load("data/states/shop/bat2.png")
+bat3 = pygame.image.load("data/states/shop/bat3.png")
+soldout = pygame.image.load("data/states/shop/soldout.png")
 #Database configuration
 #==================================================================================================#
 class keyboard:
@@ -303,7 +320,7 @@ class Enemy(pygame.sprite.Sprite):
         self.killplayer()
 
 
-
+# Custom Enemy Class
 class CustomEnemy(pygame.sprite.Sprite):
     def __init__(self, name, difficulty, pfp, pfpx, pfpy):
         super().__init__()
@@ -351,24 +368,56 @@ def mainscreen(screen):
     screen.blit(quitbutton, quitbuttonrect)
     screen.blit(optionsbutton, optionsbuttonrect)
     screen.blit(charliepfp, (1200, 600))
-    
+    screen.blit(shopbutton, shopbuttonrect)
     mousepos = pygame.mouse.get_pos()
     mousepress = pygame.mouse.get_pressed()
     
+    if shopbuttonrect.collidepoint(mousepos):
+        screen.blit(shopbuttonp, shopbuttonrect)
+        if mousepress[0]and cooldown("button",0.3):
+            states.append(shop)
+        
     if playbuttonrect.collidepoint(mousepos):
         screen.blit(playbuttonp, playbuttonrect)
         if mousepress[0]and cooldown("button",0.3):
             states.append(customscreen)
+
     if optionsbuttonrect.collidepoint(mousepos):
         screen.blit(optionsbuttonp, optionsbuttonrect)
         if mousepress[0]and cooldown("button",0.3):
             states.append(options)
+
     if quitbuttonrect.collidepoint(mousepos):
         screen.blit(quitbuttonp, quitbuttonrect)
         if mousepress[0]and cooldown("button",0.3):
             pygame.quit()
             exit()
 #==================================================================================================#
+def shop(screen):
+    vhs(screen)
+    screen.blit(backbutton, backbuttonrect)
+    checkstoreitem()
+    print(flashlevel)
+    print(Database.get_inventory())
+    screen.blit(flashlevel, (800, 300))
+    if backbuttonrect.collidepoint(mousepos):
+        screen.blit(backbuttonp, backbuttonrect)
+        if mousepress[0] and cooldown("button",0.3):
+            states.pop()
+
+def checkstoreitem():
+    global flashlevel
+    inventory_level = Database.get_inventory()
+
+    if inventory_level == 0:
+        flashlevel = bat1
+    elif inventory_level == 1:
+        flashlevel = bat2
+    elif inventory_level == 2:
+        flashlevel = bat3
+    elif inventory_level == 3:
+        flashlevel = soldout
+    
 
 # Options
 def options(screen):
@@ -754,13 +803,6 @@ class Frederick(Enemy):
         self.positionswitch()
         self.killplayer()
         
-        
-    
-        
-
-            
-
-
 class FredDerick(Enemy):
     def __init__(self, name, difficulty):
         super().__init__(name, difficulty)

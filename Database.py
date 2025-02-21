@@ -27,7 +27,8 @@ cursor.execute('''
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS money (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        money INTEGER DEFAULT 0
+        money INTEGER DEFAULT 0,
+        flashlightlevel INTEGER DEFAULT 0
     )
 ''')
     
@@ -56,7 +57,7 @@ def add_user(username, password):
     if cursor.fetchone() is None:
         cursor.execute('INSERT INTO users (username, password, inuse) VALUES (?, ?, 0)', (username, caesar_cipher(password, 3, 'encrypt')))
         cursor.execute('INSERT INTO highscores (username, highscore) VALUES (?, 0)', (username,))
-        cursor.execute('INSERT INTO money (money) VALUES (0)')
+        cursor.execute('INSERT INTO money (money, flashlightlevel) VALUES (0, 0)')
         conn.commit()
     else:
         cursor.execute('UPDATE users SET inuse = 1 WHERE username = ? AND password = ?', (username, caesar_cipher(password, 3, 'encrypt')))
@@ -116,3 +117,6 @@ def moneyhighscore():
     cursor.execute('SELECT users.username, money.money FROM users, money WHERE money.id = users.id ORDER BY money DESC LIMIT 10')
     return cursor.fetchall()
 
+def get_inventory():
+    cursor.execute('SELECT flashlightlevel FROM money WHERE id = (SELECT id FROM users WHERE inuse = 1)')
+    return cursor.fetchone()
