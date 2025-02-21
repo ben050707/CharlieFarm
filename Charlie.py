@@ -498,10 +498,10 @@ def login(screen):
             states.pop()
 
 def calculate_final_score():
-    global final_score
+    global final_score, power
     final_score = 0
     for enemy in enemygroup:
-        final_score += enemy.difficulty * 10  # Each difficulty point counts as 10 points
+        final_score += enemy.difficulty * 10 + (power / 400)  # Each difficulty point counts as 10 points
     print(f"Final Score: {final_score}")
 
 def update_highscore_if_needed():
