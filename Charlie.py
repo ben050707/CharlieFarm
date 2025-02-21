@@ -21,7 +21,8 @@ canpurchase = True
 #all character sfunctiining
 
 #TO ADD:
-#Databse design/leaderbaord ready
+#Money leaderboard fix
+#
 #error handling
 # predetermined nights (progres is stored using eggs that will be stored in database)
 # balancing
@@ -127,6 +128,10 @@ beginbuttonrect = beginbutton.get_rect(center = (1500, 850))
 
 #Options buttons
 
+registerbutton = pygame.image.load("data/states/Options/registerbutton.png")
+registerbuttonp = pygame.image.load("data/states/Options/registerbuttonp.png")
+registerbuttonrect = registerbutton.get_rect(topleft = (500, 900))
+
 loginbutton = pygame.image.load("data/states/Options/loginbutton.png")
 loginbuttonp = pygame.image.load("data/states/Options/loginbuttonp.png")
 loginbuttonrect = loginbutton.get_rect(center = (300, 600))
@@ -140,13 +145,13 @@ leaderboardbuttonp = pygame.image.load("data/states/Options/leaderboardbuttonp.p
 leaderboardbuttonrect = leaderboardbutton.get_rect(center = (300, 900))
 
 leftbutton = pygame.image.load("data/states/Options/left.png")
-leftbuttonrect = leftbutton.get_rect(center = (300, 600))
+leftbuttonrect = leftbutton.get_rect(center = (300, 200))
 
 rightbutton = pygame.image.load("data/states/Options/right.png")
-rightbuttonrect = rightbutton.get_rect(center = (300, 1100))
+rightbuttonrect = rightbutton.get_rect(center = (1600, 200))
 
 optionsbackbuttonrect = backbutton.get_rect(topleft = (600, 850))
-loginscreenbuttonrect = loginbutton.get_rect(topleft = (750, 900))
+loginscreenbuttonrect = loginbutton.get_rect(topleft = (1000, 900))
 
 logingui = imgimport("data/states/Options/logingraphic.png", (1920, 1080))
 
@@ -162,8 +167,9 @@ shopbuttonrect = shopbutton.get_rect(center = (600, 600))
 
 buybutton = pygame.image.load("data/states/shop/buybutton.png")
 buybuttonp = pygame.image.load("data/states/shop/buybuttonp.png")
+canbuy = pygame.image.load("data/states/shop/buybutton.png")
 cantbuy = pygame.image.load("data/states/shop/expensive.png")
-buybuttonrect = buybutton.get_rect(center = (600, 600))
+buybuttonrect = buybutton.get_rect(center = (890, 550))
 
 bat1 = pygame.image.load("data/states/shop/bat1.png")
 bat2 = pygame.image.load("data/states/shop/bat2.png")
@@ -362,6 +368,8 @@ enemygroup = pygame.sprite.Group()
 
 # Mainscreen
 def mainscreen(screen):
+    global current_user
+
     vhs(screen)
     screen.blit(title, (200, 200))
     screen.blit(playbutton, playbuttonrect)
@@ -390,25 +398,48 @@ def mainscreen(screen):
     if quitbuttonrect.collidepoint(mousepos):
         screen.blit(quitbuttonp, quitbuttonrect)
         if mousepress[0]and cooldown("button",0.3):
+            if current_user != None:
+                Database.logout_user()
+                current_user = None  # Reset the current user
             pygame.quit()
             exit()
 #==================================================================================================#
 def shop(screen):
+    global buybutton
     vhs(screen)
     screen.blit(backbutton, backbuttonrect)
-    checkstoreitem()
-    print(flashlevel)
-    print(Database.get_inventory())
+    flashlevel = checkstoreitem()
+    moneydisplay = powerfont.render(f"Money: {str(Database.get_money())}", True, "White")
+    screen.blit(moneydisplay, (50, 50))
     screen.blit(flashlevel, (800, 300))
+
+
+
+    if (Database.get_money() < 100):
+        buybutton = cantbuy
+        screen.blit(buybutton, buybuttonrect)
+    elif Database.get_inventory() >= 3:
+        flashlevel = soldout
+        buybutton = cantbuy
+        screen.blit(buybutton, buybuttonrect)
+    else:
+        buybutton = canbuy
+        screen.blit(buybutton, buybuttonrect)
+        if buybuttonrect.collidepoint(mousepos):
+            screen.blit(buybuttonp, buybuttonrect)
+            if mousepress[0] and cooldown("buybutton",1):
+                Database.change_money(-100)
+                Database.change_flashlightlevel(1)
+
     if backbuttonrect.collidepoint(mousepos):
         screen.blit(backbuttonp, backbuttonrect)
         if mousepress[0] and cooldown("button",0.3):
             states.pop()
 
+
 def checkstoreitem():
     global flashlevel
     inventory_level = Database.get_inventory()
-
     if inventory_level == 0:
         flashlevel = bat1
     elif inventory_level == 1:
@@ -417,8 +448,8 @@ def checkstoreitem():
         flashlevel = bat3
     elif inventory_level == 3:
         flashlevel = soldout
+    return flashlevel
     
-
 # Options
 def options(screen):
     global mousepos, mousepress, current_user
@@ -466,6 +497,7 @@ def options(screen):
 
 def leaderboard(screen):
     global mousepos, mousepress
+    global leaderboard_data  # Make leaderboard_data a global variable
 
     # Clear the screen
     screen.fill((0, 0, 0))
@@ -475,21 +507,25 @@ def leaderboard(screen):
     screen.blit(title, (600, 100))
 
     # Fetch the leaderboard data from the database
-    leaderboard_data = Database.get_leaderboard(limit=10)  # Get top 10 high scores
+    leaderboard_data = Database.get_leaderboard(limit=10)  # Default to high scores leaderboard
 
     # Display each entry in the leaderboard
     y_offset = 200
-    for rank, (username, highscore) in enumerate(leaderboard_data, start=1):
-        entry_text = f"{rank}. {username}: {highscore}"
+    for rank, (username, score, money) in enumerate(leaderboard_data, start=1):
+        entry_text = f"{rank}. {username}: {score} ${money}"
         entry_surface = powerfont.render(entry_text, True, "White")
         screen.blit(entry_surface, (600, y_offset))
         y_offset += 50  # Move down for the next entry
+
+    # Display the left and right buttons
+    screen.blit(leftbutton, leftbuttonrect)
+    screen.blit(rightbutton, rightbuttonrect)
 
     # Display the back button
     screen.blit(backbutton, (600, 850))
     if optionsbackbuttonrect.collidepoint(mousepos):
         screen.blit(backbuttonp, (600, 850))
-        if mousepress[0] and cooldown("button",0.3):
+        if mousepress[0] and cooldown("button", 0.3):
             states.pop()  # Go back to the previous state (options)
 
 
@@ -499,6 +535,7 @@ def login(screen):
     screen.blit(logingui, (0, 0))
     screen.blit(backbutton, backbuttonrect)
     screen.blit(loginbutton, loginscreenbuttonrect)
+    screen.blit(registerbutton, registerbuttonrect)
 
     # Display username and password fields
     usernameinput.display(usernamerect)
@@ -519,10 +556,10 @@ def login(screen):
     # Handle back button
     if backbuttonrect.collidepoint(mousepos):
         screen.blit(backbuttonp, backbuttonrect)
-        if mousepress[0] and cooldown("button",0.3):
+        if mousepress[0] and cooldown("button", 0.3):
             states.pop()
 
-    # Handle login button click
+    # Handle login button click (exclusively for logging in)
     if loginscreenbuttonrect.collidepoint(mousepos):
         screen.blit(loginbuttonp, loginscreenbuttonrect)
         if mousepress[0]:
@@ -531,20 +568,25 @@ def login(screen):
             if Database.login_user(username, password):
                 current_user = username  # Set the current user
                 print(f"Logged in as {current_user}.")
-                states.pop()
+                states.pop()  # Return to the previous state
             else:
                 print("Invalid username or password.")
 
-    # Handle login button click
-    if loginscreenbuttonrect.collidepoint(mousepos):
-        screen.blit(loginbuttonp, loginscreenbuttonrect)
+    # Handle register button click (exclusively for registering)
+    if registerbuttonrect.collidepoint(mousepos):
+        screen.blit(registerbuttonp, registerbuttonrect)
         if mousepress[0]:
             username = usernameinput.get_word()
             password = passwordinput.get_word()
-            Database.add_user(username, password)
-            current_user = username  # Set the current user
-            print(f"Logged in as {current_user}.")
-            states.pop()
+            if Database.add_user(username, password):  # Attempt to register the user
+                print(f"User {username} registered successfully.")
+                # Automatically log in the newly registered user
+                if Database.login_user(username, password):
+                    current_user = username
+                    print(f"Logged in as {current_user}.")
+                    states.pop()  # Return to the previous state
+            else:
+                print("Registration failed. Username may already exist.")
 
 def calculate_final_score():
     global final_score, power
@@ -1156,9 +1198,14 @@ while True:
     mousepos = pygame.mouse.get_pos()
     mousepress = pygame.mouse.get_pressed()
     keys = pygame.key.get_pressed()
-
+    if current_user:
+        if mousepress[2]:
+            Database.change_money(10)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
+            if current_user != None:
+                Database.logout_user()
+                current_user = None  # Reset the current user
             pygame.quit()
             exit()
         elif event.type == pygame.KEYDOWN:
@@ -1169,6 +1216,9 @@ while True:
                 elif passwordinput.focus:
                     passwordinput.add(event.key)
             if event.key == pygame.K_ESCAPE:
+                if current_user != None:
+                    Database.logout_user()
+                    current_user = None  # Reset the current user
                 pygame.quit()
                 exit()
         else:

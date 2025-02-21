@@ -18,67 +18,92 @@ cursor.execute('''
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS highscores (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL UNIQUE,
         username TEXT NOT NULL UNIQUE,
-        highscore INTEGER DEFAULT 0
+        highscore INTEGER DEFAULT 0,
+        FOREIGN KEY (user_id) REFERENCES users(id)
     )
 ''')
 
-
+# Create the money table if it doesn't exist
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS money (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL UNIQUE,
         money INTEGER DEFAULT 0,
-        flashlightlevel INTEGER DEFAULT 0
+        flashlightlevel INTEGER DEFAULT 0,
+        FOREIGN KEY (user_id) REFERENCES users(id)
     )
 ''')
-    
+
 # Commit the changes
 conn.commit()
+    
+
 
 #Caeser cipher
 def caesar_cipher(text, shift, mode='encrypt'):
-
     result = ""
-
     for char in text:
         if char.islower():  # Shift lowercase letters
             shift_amount = shift if mode == 'encrypt' else -shift
-            result += chr((ord(char) - ord('a') + shift_amount) % 26 + ord('a'))
-        if char.isdigit():  # Shift numbers
+            result += chr(((ord(char) - ord('a') + shift_amount) % 26) + ord('a'))
+        elif char.isdigit():  # Shift numbers
             shift_amount = shift if mode == 'encrypt' else -shift
-            result += str((int(char) + shift_amount) % 10)
+            result += str((int(char) + shift_amount)) % 10
         else:
             result += char  # Non-lowercase and non-numeric characters remain unchanged
-
     return result
+
+# Test the caesar_cipher function
+def test_caesar_cipher():
+    original_password = "testpassword"
+    encrypted = caesar_cipher(original_password, 3, 'encrypt')
+    decrypted = caesar_cipher(encrypted, 3, 'decrypt')
+    print(f"Original: {original_password}")
+    print(f"Encrypted: {encrypted}")
+    print(f"Decrypted: {decrypted}")
+    assert original_password == decrypted, "Decryption failed!"
+
+test_caesar_cipher()
 
 def add_user(username, password):
     cursor.execute('SELECT * FROM users WHERE username = ?', (username,))
     if cursor.fetchone() is None:
+        # Insert the new user
         cursor.execute('INSERT INTO users (username, password, inuse) VALUES (?, ?, 0)', (username, caesar_cipher(password, 3, 'encrypt')))
-        cursor.execute('INSERT INTO highscores (username, highscore) VALUES (?, 0)', (username,))
-        cursor.execute('INSERT INTO money (money, flashlightlevel) VALUES (0, 0)')
+        # Get the newly inserted user's ID
+        user_id = cursor.lastrowid
+        # Insert a corresponding row into the money table
+        cursor.execute('INSERT INTO money (user_id, money, flashlightlevel) VALUES (?, 0, 0)', (user_id,))
+        # Insert a corresponding row into the highscores table
+        cursor.execute('INSERT INTO highscores (user_id, username, highscore) VALUES (?, ?, 0)', (user_id, username))
         conn.commit()
     else:
+        # If the user already exists, log them in
         cursor.execute('UPDATE users SET inuse = 1 WHERE username = ? AND password = ?', (username, caesar_cipher(password, 3, 'encrypt')))
         conn.commit()
-    
+        
 # Function to log in a user
 def login_user(username, password):
+    # Fetch the stored encrypted password from the database
     cursor.execute('SELECT password FROM users WHERE username = ?', (username,))
     result = cursor.fetchone()
     
     if result is not None:
-        stored_password = caesar_cipher(result[0], 3, 'decrypt')  # Decrypt the stored password using Caesar cipher result[0]
-        if stored_password == password:  # Compare plain-text passwords
+        stored_encrypted_password = result[0]  # Get the stored encrypted password
+        # Decrypt the stored password
+        stored_decrypted_password = caesar_cipher(stored_encrypted_password, 3, 'decrypt')
+        # Compare the decrypted stored password with the input password
+        if stored_decrypted_password == password:
+            # Mark the user as logged in
             cursor.execute('UPDATE users SET inuse = 1 WHERE username = ?', (username,))
             conn.commit()
             return True
     return False
-
 # Function to log out a user
 def logout_user():
-    cursor.execute('UPDATE users SET inuse = 0')
+    cursor.execute('UPDATE users SET inuse = 0 WHERE inuse = 1')
     conn.commit()
 
 # Function to update a user's high score
@@ -92,6 +117,9 @@ def update_highscore(username, new_highscore):
             cursor.execute('UPDATE highscores SET highscore = ? WHERE username = ?', (new_highscore, username))
     conn.commit()
 
+
+
+
 # Function to get a user's high score
 def get_highscore(username):
     cursor.execute('SELECT highscore FROM highscores WHERE username = ?', (username,))
@@ -102,21 +130,32 @@ def get_highscore(username):
 
 # Function to get the leaderboard (top N high scores)
 def get_leaderboard(limit=10):
-    cursor.execute('SELECT username, highscore FROM highscores ORDER BY highscore DESC LIMIT ?', (limit,))
+    cursor.execute('SELECT highscores.username, highscores.highscore, money.money FROM highscores,money WHERE highscores.user_id = money.user_id ORDER BY highscore DESC, money DESC LIMIT ?', (limit,))
     return cursor.fetchall()
 
 def get_money():
-    cursor.execute('SELECT money FROM money WHERE id = (SELECT id FROM users WHERE inuse = 1)') #subquery
-    return cursor.fetchone()
+    cursor.execute('SELECT money FROM money WHERE user_id = (SELECT id FROM users WHERE inuse = 1)')
+    result = cursor.fetchone()
+    if result is not None:
+        return result[0]
+    return 0  # Default value if no money is found
+
+
 
 def change_money(amount):
-    cursor.execute('UPDATE money SET money = money + ? WHERE id = (SELECT id FROM users WHERE inuse = 1)', (amount,))
+    cursor.execute('UPDATE money SET money = money + ? WHERE user_id = (SELECT id FROM users WHERE inuse = 1)', (amount,))
     conn.commit()
 
-def moneyhighscore():
-    cursor.execute('SELECT users.username, money.money FROM users, money WHERE money.id = users.id ORDER BY money DESC LIMIT 10')
-    return cursor.fetchall()
+
 
 def get_inventory():
-    cursor.execute('SELECT flashlightlevel FROM money WHERE id = (SELECT id FROM users WHERE inuse = 1)')
-    return cursor.fetchone()
+    cursor.execute('SELECT flashlightlevel FROM money WHERE user_id = (SELECT id FROM users WHERE inuse = 1)')
+    result = cursor.fetchone()
+    if result is not None:
+        return result[0]
+    return 0  # Default value if no inventory is found
+
+def change_flashlightlevel(amount):
+    cursor.execute('UPDATE money SET flashlightlevel = flashlightlevel + ? WHERE user_id = (SELECT id FROM users WHERE inuse = 1)', (amount,))
+    conn.commit()
+
