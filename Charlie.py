@@ -18,17 +18,14 @@ flashlevel = 0
 canpurchase = True
 #==================================================================================================#
 #LAST DONE:
-#all character sfunctiining
+#database is finally working 
 
 #TO ADD:
-#Money leaderboard fix
-#
-#error handling
+# error handling
 # predetermined nights (progres is stored using eggs that will be stored in database)
 # balancing
 # sprites of charcaters
 # sounds
-#
 
 #i made a dictionary for cooldown function
 
