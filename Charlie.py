@@ -84,7 +84,7 @@ def rain(screen):
     CHSINDEX += 1
     if CHSINDEX >= len(CHS):
         CHSINDEX = 0
-#==================================================================================================#
+#-------------------------------------------------------------------------------------------------#
 
 #Mainscreen Buttons
 playbutton = pygame.image.load("Data/States/Mainscreen/Playbutton.png")
@@ -100,8 +100,12 @@ optionsbutton = pygame.image.load("Data/States/Mainscreen/Optionsbutton.png")
 optionsbuttonp = pygame.image.load("Data/States/Mainscreen/OptionsbuttonP.png")
 optionsbuttonrect = optionsbutton.get_rect(center = (375, 750))
 
+controlsbutton = pygame.image.load("Data/States/Mainscreen/Controlsbutton.png")
+controlsbuttonp = pygame.image.load("Data/States/Mainscreen/ControlsbuttonP.png")
+controlsbuttonrect = controlsbutton.get_rect(center = (800, 750))
+
 charliepfp = pygame.image.load("Data/States/Mainscreen/Charlie.png")
-#==================================================================================================#
+#--------------------------------------------------------------------------------------------------#
 
 # Customscreen Buttons
 customborders = pygame.image.load("data/states/custom/CustomBorders.png")
@@ -121,7 +125,7 @@ beginbuttonr = pygame.image.load("data/states/custom/BeginR.png")
 beginbuttonp = pygame.image.load("data/states/custom/BeginP.png")
 beginbuttonrect = beginbutton.get_rect(center = (1500, 850))
 
-#==================================================================================================#
+#--------------------------------------------------------------------------------------------------#
 
 #Options buttons
 
@@ -141,11 +145,7 @@ leaderboardbutton = pygame.image.load("data/states/Options/leaderboardbutton.png
 leaderboardbuttonp = pygame.image.load("data/states/Options/leaderboardbuttonp.png")
 leaderboardbuttonrect = leaderboardbutton.get_rect(center = (300, 900))
 
-leftbutton = pygame.image.load("data/states/Options/left.png")
-leftbuttonrect = leftbutton.get_rect(center = (300, 200))
 
-rightbutton = pygame.image.load("data/states/Options/right.png")
-rightbuttonrect = rightbutton.get_rect(center = (1600, 200))
 
 optionsbackbuttonrect = backbutton.get_rect(topleft = (600, 850))
 loginscreenbuttonrect = loginbutton.get_rect(topleft = (1000, 900))
@@ -154,7 +154,7 @@ logingui = imgimport("data/states/Options/logingraphic.png", (1920, 1080))
 
 usernamerect = pygame.rect.Rect(500, 350, 840, 140)
 passwordrect = pygame.rect.Rect(500, 725, 840, 140)
-#==================================================================================================#
+#--------------------------------------------------------------------------------------------------#
 
 #Shop buttons
 
@@ -172,6 +172,101 @@ bat1 = pygame.image.load("data/states/shop/bat1.png")
 bat2 = pygame.image.load("data/states/shop/bat2.png")
 bat3 = pygame.image.load("data/states/shop/bat3.png")
 soldout = pygame.image.load("data/states/shop/soldout.png")
+
+#--------------------------------------------------------------------------------------------------#
+
+#Controls buttons
+
+leftbutton = pygame.image.load("data/states/Options/left.png")
+leftbuttonrect = leftbutton.get_rect(center = (300, 600))
+
+rightbutton = pygame.image.load("data/states/Options/right.png")
+rightbuttonrect = rightbutton.get_rect(center = (300, 700))
+ControlIndex = 0
+Entity = ["State: Office", "State: Cameras", "State: Back", "Entity: Coby", "Entity: Cody","Entity: Frederick", "Entity: Chavo", "Entity: Cedrick", "Entity: FredDerick"]
+PFP = [0, 0, 0, pygame.image.load("Data/States/Custom/Coby.png"), pygame.image.load("Data/States/Custom/Cody.png"), pygame.image.load("Data/States/Custom/Frederick.png"),
+        pygame.image.load("Data/States/Custom/Chavo.png"), pygame.image.load("Data/States/Custom/Cedrick.png"), pygame.image.load("Data/States/Custom/Fred_Derrick.png")
+        ]
+for i in range(len(PFP)):
+    if PFP[i] != 0:
+        PFP[i] = pygame.transform.scale(PFP[i], (400, 400))
+
+Description = [
+    #Office
+    "You have a power meter and a time limit. To beat the game, you must reach 6AM before you get caught by one \n"
+    "of the enemies or before your power runs out.\n"
+    "You press SPACEBAR to turn on/off your flashlight and WASD to move it.\n"
+    "Use Q/E to toggle the doors on and off. Keep in mind using the flashlight or the doors will drain your power. \n"
+    "Use C to enter the camera state. \n"
+    "Use B to enter the backview state.",
+    #Cameras
+    "In this state, you are able to look through the cameras, revealing the locations of the enemies. \n"
+    "You can use numbers 1-9 to change between camera positions. \n"
+    "You are vulnerable to the enemies in this state, and it slowly drains your power, so only use it when necessary. \n"
+    "Use C to exit out of the camera state back into the office state",
+    #Back
+    "In this state, you are able to look through the backview, checking the status of the minigame. \n"
+    "You are vulnerable to the enemies in this state, so only enter this state when necessary. \n"
+    "Use B to exit out of the backview state and back into the office state",
+    #Coby
+    "Coby is an enemy that will slowly move towards you. \n"
+    "He occupies the left side door, to get rid of Coby, you press Q to toggle the door shut. He will eventually leave, \n" 
+    "returning to his original position. \n"
+    "There is a small chance for all enemies(excluding FredDerick) to move backwards from their path. \n"
+    "If you do not press Q in time, you will get caught by Coby and the game will end.",
+    #Cody
+    "Cody is an enemy that will slowly move towards you. \n"
+    "He occupies the right side door, to get rid of Cody, you press E to toggle the door shut. He will eventually leave, \n"
+    "returning to his original position. \n"
+    "If you do not press E in time, you will get caught by Cody and the game will end.",
+    #Frederick
+    "Frederick is not a physical entity but instead is a character made to make it harder to deal with other enemies. \n"
+    "He will hack your cameras, preventing you from using them. \n"
+    "To undo this hack, you must find the camera position containing a change in the hack image(red text) \n"
+    "Cedrick's movement is impeded by camera view, so if the cameras are hacked he is free to move around. \n",
+    #Chavo
+    "Chavo is an enemy that moves towards the front side of the barn. \n"
+    "There is a camera position that does not display anything, but you can hear if Chavo is there. \n"
+    "If Chavo is seen in the office, you must use the flashlight to blind him for a certain period of time. \n"
+    "Chavo will return to his original position if you have blinded him for long enough. \n"
+    "If you do not blind Chavo in time, you will get caught by Chavo and the game will end.",
+    #Cedrick
+    "Cedrick is an enemy that will not enter the office directly but can still catch you. \n"
+    "He will move towards the upstairs of the barn, then move to the right side of the barn. \n"
+    "If you see him on the cameras on the right side of the barn, you must press E to toggle the right door shut. \n"
+    "If you do not press E in time, you will get caught by Cedrick and the game will end."
+    "If you do shut the door in time, Cedrick will return to his original position.",
+    #FredDerick
+    "FredDerick is the only enemy that does not start in the chicken coop, but is instead trapped inside the shed. \n"
+    "There are ropes blocking the door, preventing FredDerick from escaping. \n"
+    "The ropes will begin to snap, so you must match the colors to secure the ropes again. \n"
+    "The ropes will not snap if you are viewing the backview. \n"
+    "If all the ropes snap, All the ropes will reconnnect and FredDerick will increase in anger. \n"
+    "If all the ropes have snapped 3 times, FredDerick will instantly end the game."
+]
+
+def render_multiline_text(screen, text_array, index, font, color, x, y, line_height):
+    """
+    Render a specific paragraph from a list of multi-line text on the screen.
+
+    :param screen: The Pygame screen surface.
+    :param text_array: A list of multi-line text strings.
+    :param index: The index of the paragraph to display.
+    :param font: The Pygame font object.
+    :param color: The color of the text.
+    :param x: The x-coordinate of the starting position.
+    :param y: The y-coordinate of the starting position.
+    :param line_height: The vertical space between lines.
+    """
+    if 0 <= index < len(text_array):  # Ensure the index is valid
+        text = text_array[index]  # Get the specific paragraph
+        lines = text.split("\n")  # Split the text into lines
+        for i, line in enumerate(lines):
+            text_surface = font.render(line, True, color)
+            screen.blit(text_surface, (x, y + i * line_height))
+    else:
+        print(f"Index {index} is out of range for the text array.")
+#--------------------------------------------------------------------------------------------------#
 #Database configuration
 #==================================================================================================#
 class keyboard:
@@ -356,7 +451,7 @@ class CustomEnemy(pygame.sprite.Sprite):
 
     def update(self):
         self.arrowdisplay()
-#==================================================================================================#
+#--------------------------------------------------------------------------------------------------#
 
 #Groups
 customenemygroup = pygame.sprite.Group()
@@ -374,6 +469,8 @@ def mainscreen(screen):
     screen.blit(optionsbutton, optionsbuttonrect)
     screen.blit(charliepfp, (1200, 600))
     screen.blit(shopbutton, shopbuttonrect)
+    screen.blit(controlsbutton, controlsbuttonrect)
+
     mousepos = pygame.mouse.get_pos()
     mousepress = pygame.mouse.get_pressed()
     
@@ -392,6 +489,11 @@ def mainscreen(screen):
         if mousepress[0]and cooldown("button",0.3):
             states.append(options)
 
+    if controlsbuttonrect.collidepoint(mousepos):
+        screen.blit(controlsbuttonp, controlsbuttonrect)
+        if mousepress[0]and cooldown("button",0.3):
+            states.append(controls)
+
     if quitbuttonrect.collidepoint(mousepos):
         screen.blit(quitbuttonp, quitbuttonrect)
         if mousepress[0]and cooldown("button",0.3):
@@ -400,7 +502,42 @@ def mainscreen(screen):
                 current_user = None  # Reset the current user
             pygame.quit()
             exit()
-#==================================================================================================#
+#--------------------------------------------------------------------------------------------------#
+
+def controls(screen):
+    global ControlIndex  # Add this line to ensure you can modify the global variable
+
+    vhs(screen)
+    # Display the left and right buttons
+    screen.blit(leftbutton, leftbuttonrect)
+    screen.blit(rightbutton, rightbuttonrect)
+    screen.blit(backbutton, backbuttonrect)
+
+    # Display the entity and description
+    Title = powerfont.render(Entity[ControlIndex], True, "White")
+    screen.blit(Title, (800, 50))
+    if PFP[ControlIndex] != 0:
+        screen.blit(PFP[ControlIndex], (1300, 600))
+
+    # Render the description directly
+    render_multiline_text(screen, Description, ControlIndex, powerfont, "White", 25, 200, 30)
+
+    # Handle button clicks
+    if leftbuttonrect.collidepoint(mousepos):
+        if mousepress[0] and cooldown("button", 0.3):
+            ControlIndex = (ControlIndex - 1) % len(Entity)  # Cycle to the previous index
+    if rightbuttonrect.collidepoint(mousepos):
+        if mousepress[0] and cooldown("button", 0.3):
+            ControlIndex = (ControlIndex + 1) % len(Entity)  # Cycle to the next index
+
+    if backbuttonrect.collidepoint(mousepos):
+        screen.blit(backbuttonp, backbuttonrect)
+        if mousepress[0] and cooldown("button", 0.3):
+            states.pop()
+
+
+
+#--------------------------------------------------------------------------------------------------#
 def shop(screen):
     global buybutton
     vhs(screen)
@@ -513,10 +650,6 @@ def leaderboard(screen):
         entry_surface = powerfont.render(entry_text, True, "White")
         screen.blit(entry_surface, (600, y_offset))
         y_offset += 50  # Move down for the next entry
-
-    # Display the left and right buttons
-    screen.blit(leftbutton, leftbuttonrect)
-    screen.blit(rightbutton, rightbuttonrect)
 
     # Display the back button
     screen.blit(backbutton, (600, 850))

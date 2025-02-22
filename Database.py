@@ -77,10 +77,12 @@ def add_user(username, password):
         # Insert a corresponding row into the highscores table
         cursor.execute('INSERT INTO highscores (user_id, highscore) VALUES (?, 0)', (user_id,))
         conn.commit()
+        return True
     else:
         # If the user already exists, log them in
         cursor.execute('UPDATE users SET inuse = 1 WHERE username = ? AND password = ?', (username, caesar_cipher(password, 3, 'encrypt')))
         conn.commit()
+        return False
 
 # Function to log in a user
 def login_user(username, password):
