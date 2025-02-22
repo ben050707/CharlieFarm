@@ -26,11 +26,12 @@ cursor.execute('''
 
 # Create the money table if it doesn't exist
 cursor.execute('''
-    CREATE TABLE IF NOT EXISTS money (
+    CREATE TABLE IF NOT EXISTS userdata (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER NOT NULL UNIQUE,
         money INTEGER DEFAULT 0,
         flashlightlevel INTEGER DEFAULT 0,
+        stars INTEGER DEFAULT 0,
         FOREIGN KEY (user_id) REFERENCES users(id)
     )
 ''')
@@ -73,7 +74,7 @@ def add_user(username, password):
         # Get the newly inserted user's ID
         user_id = cursor.lastrowid
         # Insert a corresponding row into the money table
-        cursor.execute('INSERT INTO money (user_id, money, flashlightlevel) VALUES (?, 0, 0)', (user_id,))
+        cursor.execute('INSERT INTO userdata (user_id, money, flashlightlevel, stars) VALUES (?, 0, 0, 0)', (user_id,))
         # Insert a corresponding row into the highscores table
         cursor.execute('INSERT INTO highscores (user_id, highscore) VALUES (?, 0)', (user_id,))
         conn.commit()
@@ -157,18 +158,18 @@ def get_highscore(username):
 # Function to get the leaderboard (top N high scores)
 def get_leaderboard(limit=10):
     cursor.execute('''
-        SELECT users.username, highscores.highscore, money.money
+        SELECT users.username, highscores.highscore, userdata.money
         FROM highscores
         JOIN users ON highscores.user_id = users.id
-        JOIN money ON highscores.user_id = money.user_id
-        ORDER BY highscores.highscore DESC, money.money DESC
+        JOIN userdata ON highscores.user_id = userdata.user_id
+        ORDER BY highscores.highscore DESC, userdata.money DESC
         LIMIT ?
     ''', (limit,))
     return cursor.fetchall()
 
 # Function to get the current user's money
 def get_money():
-    cursor.execute('SELECT money FROM money WHERE user_id = (SELECT id FROM users WHERE inuse = 1)')
+    cursor.execute('SELECT money FROM userdata WHERE user_id = (SELECT id FROM users WHERE inuse = 1)')
     result = cursor.fetchone()
     if result is not None:
         return result[0]
@@ -176,12 +177,12 @@ def get_money():
 
 # Function to change the current user's money
 def change_money(amount):
-    cursor.execute('UPDATE money SET money = money + ? WHERE user_id = (SELECT id FROM users WHERE inuse = 1)', (amount,))
+    cursor.execute('UPDATE userdata SET money = money + ? WHERE user_id = (SELECT id FROM users WHERE inuse = 1)', (amount,))
     conn.commit()
 
 # Function to get the current user's inventory (flashlight level)
 def get_inventory():
-    cursor.execute('SELECT flashlightlevel FROM money WHERE user_id = (SELECT id FROM users WHERE inuse = 1)')
+    cursor.execute('SELECT flashlightlevel FROM userdata WHERE user_id = (SELECT id FROM users WHERE inuse = 1)')
     result = cursor.fetchone()
     if result is not None:
         return result[0]
@@ -189,5 +190,16 @@ def get_inventory():
 
 # Function to change the current user's flashlight level
 def change_flashlightlevel(amount):
-    cursor.execute('UPDATE money SET flashlightlevel = flashlightlevel + ? WHERE user_id = (SELECT id FROM users WHERE inuse = 1)', (amount,))
+    cursor.execute('UPDATE userdata SET flashlightlevel = flashlightlevel + ? WHERE user_id = (SELECT id FROM users WHERE inuse = 1)', (amount,))
+    conn.commit()
+
+def get_stars():
+    cursor.execute('SELECT stars FROM userdata WHERE user_id = (SELECT id FROM users WHERE inuse = 1)')
+    result = cursor.fetchone()
+    if result is not None:
+        return result[0]
+    return 0
+
+def change_stars(amount):
+    cursor.execute('UPDATE userdata SET stars = stars + ? WHERE user_id = (SELECT id FROM users WHERE inuse = 1)', (amount,))
     conn.commit()

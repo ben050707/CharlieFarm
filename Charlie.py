@@ -13,16 +13,18 @@ transparent = (0, 0, 0, 0)
 rawtime = int(time.time())
 dying = False
 current_user = None
+current_star = 0
+customgame = False
 final_score = 0
 flashlevel = 0
 canpurchase = True
+powermultiplier = 1
 #==================================================================================================#
 #LAST DONE:
 #database is finally working 
 
 #TO ADD:
 # error handling
-# predetermined nights (progres is stored using eggs that will be stored in database)
 # balancing
 # sprites of charcaters
 # sounds
@@ -84,6 +86,25 @@ def rain(screen):
     CHSINDEX += 1
     if CHSINDEX >= len(CHS):
         CHSINDEX = 0
+
+def debug_win():
+    global states
+    # Simulate winning the game
+    states.append(win)
+
+def display_stars(screen, star_count):
+    """
+    Display the user's stars in a row on the screen.
+
+    :param screen: The Pygame screen surface.
+    :param star_count: The number of stars the user has.
+    """
+    star_image = pygame.image.load("Data/States/Mainscreen/star.png")  # Load the star image
+    star_image = pygame.transform.scale(star_image, (50, 50))  # Resize the star image if needed
+    star_spacing = 60  # Space between each star
+
+    for i in range(star_count):
+        screen.blit(star_image, (150 + i * star_spacing, 400))  # Display stars in a row
 #-------------------------------------------------------------------------------------------------#
 
 #Mainscreen Buttons
@@ -105,6 +126,34 @@ controlsbuttonp = pygame.image.load("Data/States/Mainscreen/ControlsbuttonP.png"
 controlsbuttonrect = controlsbutton.get_rect(center = (800, 750))
 
 charliepfp = pygame.image.load("Data/States/Mainscreen/Charlie.png")
+
+stardisplay = pygame.image.load("Data/States/Mainscreen/star.png")
+#--------------------------------------------------------------------------------------------------#
+
+#Playbuttons
+
+newgamebutton = pygame.image.load("data/states/play/newgamebutton.png")
+newgamebuttonp = pygame.image.load("data/states/play/newgamebuttonp.png")
+newgamebuttonrect = newgamebutton.get_rect(center = (300, 600))
+
+continuebutton = pygame.image.load("data/states/play/continuebutton.png")
+continuebuttonp = pygame.image.load("data/states/play/continuebuttonp.png")
+continuebuttonrect = continuebutton.get_rect(center = (300, 750))
+
+custombutton = pygame.image.load("data/states/play/custombutton.png")
+custombuttonp = pygame.image.load("data/states/play/custombuttonp.png")
+custombuttonrect = custombutton.get_rect(center = (300, 900))
+
+# Define difficulty progression for each character based on stars
+difficulty_progression = {
+    "Coby": [1, 2, 3, 6, 7],  # Difficulty increases with stars
+    "Cody": [1, 2, 4, 5, 6],
+    "Cedrick": [0, 1, 2, 3, 4],
+    "Chavo": [0, 0, 2, 3, 4],
+    "Frederick": [0, 0, 0, 2, 3],
+    "FredDerick": [0, 1, 2, 3, 4],
+}
+
 #--------------------------------------------------------------------------------------------------#
 
 # Customscreen Buttons
@@ -438,10 +487,10 @@ class CustomEnemy(pygame.sprite.Sprite):
         difficultydisplay = powerfont.render(str(self.difficulty), True, "White")
         screen.blit(difficultydisplay, (self.pfpx, self.pfpy + 125))
         if self.rectleft.collidepoint(mousepos):
-            if mousepress[0] and self.difficulty > 0 and cooldown("arrow_left", 0.2):
+            if mousepress[0] and self.difficulty > 0 and cooldown("arrow_left", 0.1):
                 self.difficulty -= 1
         if self.rectright.collidepoint(mousepos):
-            if mousepress[0] and self.difficulty < 10 and cooldown("arrow_right", 0.2):
+            if mousepress[0] and self.difficulty < 10 and cooldown("arrow_right", 0.1):
                 self.difficulty += 1
     def returndifficulty(self):
         return self.difficulty
@@ -474,6 +523,11 @@ def mainscreen(screen):
     mousepos = pygame.mouse.get_pos()
     mousepress = pygame.mouse.get_pressed()
     
+        # Display the user's stars if logged in
+    if current_user:
+        star_count = Database.get_stars()
+        display_stars(screen, star_count)
+
     if shopbuttonrect.collidepoint(mousepos):
         screen.blit(shopbuttonp, shopbuttonrect)
         if mousepress[0]and cooldown("button",0.3):
@@ -482,7 +536,7 @@ def mainscreen(screen):
     if playbuttonrect.collidepoint(mousepos):
         screen.blit(playbuttonp, playbuttonrect)
         if mousepress[0]and cooldown("button",0.3):
-            states.append(customscreen)
+            states.append(play)
 
     if optionsbuttonrect.collidepoint(mousepos):
         screen.blit(optionsbuttonp, optionsbuttonrect)
@@ -503,7 +557,87 @@ def mainscreen(screen):
             pygame.quit()
             exit()
 #--------------------------------------------------------------------------------------------------#
+def play(screen):
+    global current_star, customgame
+    vhs(screen)
 
+    # Get the current user's stars
+    current_star = Database.get_stars()
+
+    # Display buttons
+
+    screen.blit(newgamebutton, newgamebuttonrect)
+    screen.blit(continuebutton, continuebuttonrect)
+    screen.blit(custombutton, custombuttonrect)
+    screen.blit(backbutton, optionsbackbuttonrect)
+
+    star_count = Database.get_stars()
+    if current_user:
+        display_stars(screen, star_count)
+    # Handle button clicks
+    if newgamebuttonrect.collidepoint(mousepos):
+        screen.blit(newgamebuttonp, newgamebuttonrect)
+        if mousepress[0] and cooldown("button", 0.3):
+            customgame = False # Set customgame to False
+            # Reset the user's stars to 0
+            Database.change_stars(-current_star)  # Subtract current stars to set to 0
+            current_star = 0  # Update the current_star variable
+
+            # Set the difficulty based on stars (0 in this case)
+            coby_difficulty = difficulty_progression["Coby"][current_star]
+            cody_difficulty = difficulty_progression["Cody"][current_star]
+            cedrick_difficulty = difficulty_progression["Cedrick"][current_star]
+            chavo_difficulty = difficulty_progression["Chavo"][current_star]
+            frederick_difficulty = difficulty_progression["Frederick"][current_star]
+            fredderick_difficulty = difficulty_progression["FredDerick"][current_star]
+
+            # Initialize the game with the calculated difficulties
+            reset()
+            enemygroup.add(Coby("Coby", coby_difficulty))
+            enemygroup.add(Cody("Cody", cody_difficulty))
+            enemygroup.add(Cedrick("Cedrick", cedrick_difficulty))
+            enemygroup.add(Chavo("Chavo", chavo_difficulty))
+            enemygroup.add(Frederick("Frederick", frederick_difficulty))
+            enemygroup.add(FredDerick("FredDerick", fredderick_difficulty))
+
+            # Start the game
+            states.append(game)
+
+    if continuebuttonrect.collidepoint(mousepos):
+        screen.blit(continuebuttonp, continuebuttonrect)
+        if mousepress[0] and cooldown("button", 0.3):
+            customgame = False # Set customgame to False
+            # Use the user's current stars to set the difficulty
+            coby_difficulty = difficulty_progression["Coby"][current_star]
+            cody_difficulty = difficulty_progression["Cody"][current_star]
+            cedrick_difficulty = difficulty_progression["Cedrick"][current_star]
+            chavo_difficulty = difficulty_progression["Chavo"][current_star]
+            frederick_difficulty = difficulty_progression["Frederick"][current_star]
+            fredderick_difficulty = difficulty_progression["FredDerick"][current_star]
+
+            # Initialize the game with the calculated difficulties
+            reset()
+            enemygroup.add(Coby("Coby", coby_difficulty))
+            enemygroup.add(Cody("Cody", cody_difficulty))
+            enemygroup.add(Cedrick("Cedrick", cedrick_difficulty))
+            enemygroup.add(Chavo("Chavo", chavo_difficulty))
+            enemygroup.add(Frederick("Frederick", frederick_difficulty))
+            enemygroup.add(FredDerick("FredDerick", fredderick_difficulty))
+
+            # Start the game
+            states.append(game)
+
+    if custombuttonrect.collidepoint(mousepos):
+        screen.blit(custombuttonp, custombuttonrect)
+        if mousepress[0] and cooldown("button", 0.3):
+            customgame = True
+            states.append(customscreen)
+
+    if optionsbackbuttonrect.collidepoint(mousepos):
+        screen.blit(backbuttonp, optionsbackbuttonrect)
+        if mousepress[0] and cooldown("button", 0.3):
+            states.pop()
+#--------------------------------------------------------------------------------------------------#
 def controls(screen):
     global ControlIndex  # Add this line to ensure you can modify the global variable
 
@@ -987,8 +1121,10 @@ class FredDerick(Enemy):
         self.chance = 2
         if self.difficulty == 0:
             self.ticktime = 1000
+        elif self.difficulty == 10:
+            self.ticktime = 4
         else:
-            self.ticktime = (10 - self.difficulty)
+            self.ticktime = (15 - self.difficulty)
         self.flashlight = (-1700, -500)
         self.screenpos = (400, 400)
     def tick(self):
@@ -1189,7 +1325,7 @@ def door(side):
 #Reset game variables function
 
 def reset():
-    global inoffice, incameras, inback, flashlighton, flashlightpos, incameras, inback, power, rawtime, inplay, jumpscaretimer, hacked, tree, cameraposarray
+    global inoffice, incameras, inback, flashlighton, flashlightpos, incameras, inback, power, rawtime, inplay, jumpscaretimer, hacked, tree, cameraposarray, powermultiplier
     jumpscaretimer = 0
     inoffice = True
     flashlighton = False
@@ -1198,7 +1334,8 @@ def reset():
     flashlightpos = (-1000, -600)
     incameras = False
     inback = False
-    power = 40000
+    powermultiplier = (((Database.get_inventory()) / 5) + 1)
+    power = 40000 * powermultiplier
     rawtime = int(time.time())
     inplay = True
     hacked = False
@@ -1288,7 +1425,7 @@ def game(screen):
 
 # Win Screen
 def win(screen):
-    global final_score, current_user
+    global final_score, current_user, customgame
 
     screen.fill((0, 0, 0))
     vhs(screen)
@@ -1299,11 +1436,23 @@ def win(screen):
     update_highscore_if_needed()
 
     # Add the final score to the user's money
-    if current_user:
-        Database.change_money(final_score)
-        print(f"Added {final_score} to {current_user}'s money.")
+
 
     if keys[pygame.K_SPACE]:
+        if current_user:
+            Database.change_money(final_score)
+            print(f"Added {final_score} to {current_user}'s money.")
+
+            # Increase stars by 1 (capped at 5) if it's not a custom game
+            if not customgame:
+                current_stars = Database.get_stars()
+                if current_stars < 5:
+                    Database.change_stars(1)
+                    print(f"Added 1 star to {current_user}'s profile. Current stars: {current_stars + 1}")
+                else:
+                    print(f"{current_user} already has the maximum number of stars (5).")
+            else:
+                print("No stars awarded for custom games.")
         states.pop()
         states.pop()
         states.pop()
@@ -1328,6 +1477,10 @@ while True:
     mousepos = pygame.mouse.get_pos()
     mousepress = pygame.mouse.get_pressed()
     keys = pygame.key.get_pressed()
+    # Debug: Press K to instantly win
+    if keys[pygame.K_k] and cooldown("debug", 2):
+        debug_win()
+
     if current_user:
         if mousepress[2]:
             Database.change_money(10)
