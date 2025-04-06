@@ -93,12 +93,12 @@ def debug_win():
     states.append(win)
 
 def display_stars(screen, star_count):
-    """
-    Display the user's stars in a row on the screen.
 
-    :param screen: The Pygame screen surface.
-    :param star_count: The number of stars the user has.
-    """
+    #Display the user's stars in a row on the screen.
+
+    #param screen: The Pygame screen surface.
+    #param star_count: The number of stars the user has.
+
     star_image = pygame.image.load("Data/States/Mainscreen/star.png")  # Load the star image
     star_image = pygame.transform.scale(star_image, (50, 50))  # Resize the star image if needed
     star_spacing = 60  # Space between each star
@@ -295,18 +295,18 @@ Description = [
 ]
 
 def render_multiline_text(screen, text_array, index, font, color, x, y, line_height):
-    """
-    Render a specific paragraph from a list of multi-line text on the screen.
+    
+    #Render a specific paragraph from a list of multi-line text on the screen.
 
-    :param screen: The Pygame screen surface.
-    :param text_array: A list of multi-line text strings.
-    :param index: The index of the paragraph to display.
-    :param font: The Pygame font object.
-    :param color: The color of the text.
-    :param x: The x-coordinate of the starting position.
-    :param y: The y-coordinate of the starting position.
-    :param line_height: The vertical space between lines.
-    """
+    #:param screen: The Pygame screen surface.
+    #:param text_array: A list of multi-line text strings.
+    #:param index: The index of the paragraph to display.
+    #:param font: The Pygame font object.
+    #:param color: The color of the text.
+    #:param x: The x-coordinate of the starting position.
+    #:param y: The y-coordinate of the starting position.
+   #:param line_height: The vertical space between lines.
+
     if 0 <= index < len(text_array):  # Ensure the index is valid
         text = text_array[index]  # Get the specific paragraph
         lines = text.split("\n")  # Split the text into lines
@@ -389,7 +389,7 @@ class Enemy(pygame.sprite.Sprite):
         self.ticktime = 0
         self.jumpscare = None
         self.inside = False
-        self.inside_time = 0  # Add this line
+        self.inside_time = 0  # Variable to track inside time
         self.cankill = False
     def iskilled(self):
         pass
