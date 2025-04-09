@@ -146,12 +146,12 @@ custombuttonrect = custombutton.get_rect(center = (300, 900))
 
 # Define difficulty progression for each character based on stars
 difficulty_progression = {
-    "Coby": [1, 2, 3, 6, 7],  # Difficulty increases with stars
-    "Cody": [1, 2, 4, 5, 6],
-    "Cedrick": [0, 1, 2, 3, 4],
-    "Chavo": [0, 0, 2, 3, 4],
-    "Frederick": [0, 0, 0, 2, 3],
-    "FredDerick": [0, 1, 2, 3, 4],
+    "Coby": [1, 2, 3, 6, 7, 8],  # Difficulty increases with stars
+    "Cody": [1, 2, 4, 5, 6, 8],
+    "Cedrick": [0, 1, 2, 3, 4, 8],
+    "Chavo": [0, 0, 2, 3, 4, 8],
+    "Frederick": [0, 0, 0, 2, 3, 8],
+    "FredDerick": [0, 1, 2, 3, 4, 8],
 }
 
 #--------------------------------------------------------------------------------------------------#
