@@ -19,6 +19,7 @@ final_score = 0
 flashlevel = 0
 canpurchase = True
 powermultiplier = 1
+generated_code = None
 #==================================================================================================#
 #LAST DONE:
 #database is finally working 
@@ -704,6 +705,14 @@ def shop(screen):
         if mousepress[0] and cooldown("button",0.3):
             states.pop()
 
+def generate_six_digit_code():
+    global current_user
+    if current_user and Database.get_stars() >= 5:
+        return str(random.randint(100000, 999999))
+    else:
+        print("Access denied: Must be logged in and have 5 stars.")
+        return None
+    
 
 def checkstoreitem():
     global flashlevel
@@ -720,7 +729,7 @@ def checkstoreitem():
     
 # Options
 def options(screen):
-    global mousepos, mousepress, current_user
+    global mousepos, mousepress, current_user, generated_code
 
     vhs(screen)
     screen.blit(loginbutton, loginbuttonrect)
@@ -728,6 +737,13 @@ def options(screen):
         screen.blit(loginbuttonp, loginbuttonrect)
         if mousepress[0]and cooldown("button",0.3):
             states.append(login)
+    
+    if generated_code is None:
+        generated_code = generate_six_digit_code()
+
+    if generated_code:
+        entry_surface = powerfont.render(generated_code, True, "White")
+        screen.blit(entry_surface, (1000, 100))  # Display the generated code
 
     screen.blit(logoutbutton, logoutbuttonrect)
     screen.blit(leaderboardbutton, leaderboardbuttonrect)
@@ -903,7 +919,7 @@ class Coby(Enemy):
         self.hall = pygame.image.load("Data/Characters/Coby/CobyHall.png")
         self.wall = pygame.image.load("Data/Characters/Coby/CobyWall.png")
         self.office = imgimport("Data/Characters/Coby/CobyIn.png", (200, 200))
-        self.jumpscare = imgimport("Data/Characters/Coby/CobyJumpscare.png", (1920, 1080))
+        self.jumpscare = jumpscareload("Coby")
         self.image = self.rest
         self.pathing = [3, 2 , 1, 0]
         self.imagearray = [self.rest, self.hall, self.wall, self.office]
@@ -948,7 +964,7 @@ class Cody(Enemy):
         self.hall = pygame.image.load("Data/Characters/Cody/CodyHall.png")
         self.wall = pygame.image.load("Data/Characters/Cody/CodyWall.png")
         self.office = imgimport("Data/Characters/Cody/CodyIn.png", (200, 200))
-        self.jumpscare = imgimport("Data/Characters/Cody/CodyJumpscare.png", (1920, 1080))
+        self.jumpscare = jumpscareload("Cody")
         self.image = self.rest
         self.pathing = [3, 4 , 5, 0]
         self.imagearray = [self.rest, self.hall, self.wall, self.office]
