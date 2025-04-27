@@ -21,27 +21,6 @@ canpurchase = True
 powermultiplier = 1
 generated_code = None
 #==================================================================================================#
-#LAST DONE:
-#database is finally working 
-
-#TO ADD:
-# error handling
-# balancing
-# sprites of charcaters
-# sounds
-
-#i made a dictionary for cooldown function
-
-
-#DATA STRUCTURES ADDED:
-#LIST
-#STACK
-#SET
-#DICTIONARY
-#FEATURES - ==================================
-#Tree
-#OOP
-#Database
 cooldowns = {}
 
 def cooldown(key, duration): 
@@ -640,7 +619,7 @@ def play(screen):
             states.pop()
 #--------------------------------------------------------------------------------------------------#
 def controls(screen):
-    global ControlIndex  # Add this line to ensure you can modify the global variable
+    global ControlIndex
 
     vhs(screen)
     # Display the left and right buttons
@@ -752,10 +731,10 @@ def options(screen):
     # Display the currently logged-in user
     if current_user:
         logged_in_text = powerfont.render(f"Logged in as: {current_user}", True, "White")
-        screen.blit(logged_in_text, (300, 200))  # Adjust position as needed
+        screen.blit(logged_in_text, (300, 200))  
     else:
         logged_in_text = powerfont.render("Not logged in", True, "White")
-        screen.blit(logged_in_text, (300, 200))  # Adjust position as needed
+        screen.blit(logged_in_text, (300, 200)) 
 
     # Handle logout button click
     if logoutbuttonrect.collidepoint(mousepos):
@@ -780,8 +759,7 @@ def options(screen):
             states.append(leaderboard)  # Switch to the leaderboard state
 
 def leaderboard(screen):
-    global mousepos, mousepress
-    global leaderboard_data  # Make leaderboard_data a global variable
+    global mousepos, mousepress, leaderboard_data  
 
     # Clear the screen
     screen.fill((0, 0, 0))
